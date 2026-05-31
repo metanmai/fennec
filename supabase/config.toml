@@ -1,0 +1,24 @@
+# Supabase CLI config for fennec Phase 1.
+#
+# This file is read by the `supabase` CLI when running `supabase db push`,
+# `supabase db reset`, `supabase start`, and related commands.
+#
+# Phase 1 scope: produce the schema migrations only. The actual
+# `supabase db push` against the real Supabase cloud project lives in
+# Plan 01-10 as a [BLOCKING] task; that plan is where this config is
+# fully exercised.
+#
+# Local-dev workflow (optional; not required for Plan 01-04 acceptance):
+#   supabase start          # spin up local Postgres + Auth on :54322
+#   supabase db reset       # apply all migrations from scratch + seed
+#   supabase db push        # push migrations to the linked cloud project
+#
+# See supabase/migrations/README.md for migration order + workflow notes.
+
+project_id = "fennec-phase1"
+
+[db]
+# Default Supabase CLI Postgres port. Plan 01-05's backend integration
+# tests will connect here when running locally. Override via env if
+# this conflicts with another local Postgres instance.
+port = 54322
