@@ -45,6 +45,10 @@ export type { HeartbeatSchedulerOptions } from "./heartbeat/heartbeat.js";
 export { DEFAULT_HEARTBEAT_INTERVAL_MS, HeartbeatScheduler } from "./heartbeat/heartbeat.js";
 // Heartbeat
 export { computeSchemaHash } from "./heartbeat/schema-hash.js";
+// Managed-settings install / uninstall (Plan 01-07 Task 4)
+export type { HookName, WriteFennecHooksOptions } from "./managed-settings/install.js";
+export { ALL_HOOK_NAMES, writeFennecHooks } from "./managed-settings/install.js";
+export { removeFennecHooks } from "./managed-settings/uninstall.js";
 export type { BuildCanonicalEventInput } from "./normalize/canonical.js";
 // Canonical normalisation
 export {
