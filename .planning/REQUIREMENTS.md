@@ -12,7 +12,7 @@ Requirements for initial release. Each maps to one roadmap phase. Grounded in re
 The local daemon and adapters that capture AI usage at the source.
 
 - [x] **CAP-01**: Local capture daemon runs as a single background process per user-machine, hosting all in-process adapters
-- [ ] **CAP-02**: Daemon captures Claude Code AI requests via hook entries (SessionStart, UserPromptSubmit, PostToolUse, PreCompact, SessionEnd, SubagentStop) written into Claude Code's **managed-settings layer** (system-protected path; not user-settings) by the installer
+- [x] **CAP-02**: Daemon captures Claude Code AI requests via hook entries (SessionStart, UserPromptSubmit, PostToolUse, PreCompact, SessionEnd, SubagentStop) written into Claude Code's **managed-settings layer** (system-protected path; not user-settings) by the installer
 - [ ] **CAP-03**: Daemon captures Codex CLI sessions via transcript file watcher (synapse-style adapter)
 - [ ] **CAP-04**: Daemon captures Gemini CLI sessions via transcript file watcher
 - [ ] **CAP-05**: Daemon captures Cursor IDE AI usage by watching Cursor's local SQLite/workspaceStorage
@@ -114,15 +114,15 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **DAE-08**: macOS binary + `.pkg` are signed with an Apple Developer ID certificate, notarised via `notarytool`, and stapled
 - [ ] **DAE-09**: Windows binary + `.msi` are signed with an EV code-signing certificate (cert procurement + first-signature-for-reputation-warm-up start in Phase 1; actual `.msi` build lands in Phase 5)
 - [x] **DAE-10**: Daemon respects corporate proxy env vars (`NODE_EXTRA_CA_CERTS`, `HTTPS_PROXY`)
-- [ ] **DAE-11**: Daemon coexists non-interferingly with synapse — fennec hooks live in Claude Code's managed-settings layer (system-protected), synapse hooks live in `~/.claude/settings.json` (user-layer); Claude Code's default additive merge fires both on every event
+- [x] **DAE-11**: Daemon coexists non-interferingly with synapse — fennec hooks live in Claude Code's managed-settings layer (system-protected), synapse hooks live in `~/.claude/settings.json` (user-layer); Claude Code's default additive merge fires both on every event
 - [ ] **DAE-12**: Daemon is distributed via a signed macOS `.pkg` (Apple Developer ID + notarisation + stapling) — replaces the prior npm-global distribution path
 - [ ] **DAE-13**: Daemon is distributed via a signed Windows `.msi` (EV code-signing cert)
 - [ ] **DAE-14**: Daemon is distributed via signed Linux `.deb` (apt repo) and `.rpm` (yum repo) packages
 - [ ] **DAE-15**: Daemon is distributed via a Homebrew tap (`brew install fennec`) for macOS and Linuxbrew
 - [ ] **DAE-16**: Daemon is distributed via a curl-bash installer script (`curl -fsSL fennec.dev/install.sh | sudo bash`) for unattended installs and headless CI
-- [ ] **DAE-17**: Daemon writes Claude Code hook entries to managed-settings layer at install time (`/Library/Application Support/ClaudeCode/managed-settings.json` macOS, `/etc/claude-code/managed-settings.json` Linux, `%ProgramData%\ClaudeCode\managed-settings.json` Windows), root/SYSTEM-owned, user-read-only
-- [ ] **DAE-18**: Hook handler is a compiled shim binary at `/usr/local/fennec/bin/fennec-hook` (Windows: `C:\Program Files\fennec\bin\fennec-hook.exe`) that IPCs to the running daemon via loopback bridge (HTTP or Unix socket) with ≤15ms overhead per hook fire; fails open if daemon is unreachable (Claude Code never blocked)
-- [ ] **DAE-19**: `fennec uninstall` removes only fennec's entries from managed-settings (surgical, leaves synapse user-settings untouched), requires the org-token in org-tier installs or sudo in personal-tier, and emits an audit event visible to the org admin
+- [x] **DAE-17**: Daemon writes Claude Code hook entries to managed-settings layer at install time (`/Library/Application Support/ClaudeCode/managed-settings.json` macOS, `/etc/claude-code/managed-settings.json` Linux, `%ProgramData%\ClaudeCode\managed-settings.json` Windows), root/SYSTEM-owned, user-read-only
+- [x] **DAE-18**: Hook handler is a compiled shim binary at `/usr/local/fennec/bin/fennec-hook` (Windows: `C:\Program Files\fennec\bin\fennec-hook.exe`) that IPCs to the running daemon via loopback bridge (HTTP or Unix socket) with ≤15ms overhead per hook fire; fails open if daemon is unreachable (Claude Code never blocked)
+- [x] **DAE-19**: `fennec uninstall` removes only fennec's entries from managed-settings (surgical, leaves synapse user-settings untouched), requires the org-token in org-tier installs or sudo in personal-tier, and emits an audit event visible to the org admin
 - [x] **DAE-20**: Daemon surfaces a system tray notification when no developer identity is attached after enrollment; the notification persists across reboots until SSO attach completes (see AUTH-16)
 - [ ] **DAE-21**: MDM packaging primitives in Phase 1 — the signed `.pkg` accepts an org install secret via a documented config-key schema; polished Jamf Configuration Profile, Intune ADMX, and Workspace ONE manifest templates land in Phase 5
 
@@ -222,7 +222,7 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CAP-01 | Phase 1 | Complete |
-| CAP-02 | Phase 1 | Pending |
+| CAP-02 | Phase 1 | Complete |
 | CAP-03 | Phase 2 | Pending |
 | CAP-04 | Phase 2 | Pending |
 | CAP-05 | Phase 2 | Pending |
@@ -302,15 +302,15 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | DAE-08 | Phase 1 | Pending |
 | DAE-09 | Phase 1 | Pending |
 | DAE-10 | Phase 1 | Complete |
-| DAE-11 | Phase 1 | Pending |
+| DAE-11 | Phase 1 | Complete |
 | DAE-12 | Phase 1 | Pending |
 | DAE-13 | Phase 5 | Pending |
 | DAE-14 | Phase 5 | Pending |
 | DAE-15 | Phase 5 | Pending |
 | DAE-16 | Phase 5 | Pending |
-| DAE-17 | Phase 1 | Pending |
-| DAE-18 | Phase 1 | Pending |
-| DAE-19 | Phase 1 | Pending |
+| DAE-17 | Phase 1 | Complete |
+| DAE-18 | Phase 1 | Complete |
+| DAE-19 | Phase 1 | Complete |
 | DAE-20 | Phase 1 | Complete |
 | DAE-21 | Phase 1 | Pending |
 | DIST-01 | Phase 6 | Pending |

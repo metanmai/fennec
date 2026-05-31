@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED."
-last_updated: "2026-05-31T07:54:04.728Z"
+stopped_at: "Plan 01-07 complete: Claude Code hook adapter — Go shim + loopback bridge + payload normaliser + managed-settings install/uninstall. 4 tasks, 6 commits owned, 136/136 daemon tests pass, 4/4 Go tests pass."
+last_updated: "2026-05-31T07:59:11.119Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 1 of 6 (Foundations)
-Plan: 7 of 10 in current phase
+Plan: 8 of 10 in current phase
 Status: Ready to execute
 Last activity: 2026-05-31
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [███████░░░] 70%
 | Phase 01 P05 | ~25 min | 3 tasks | 29 files |
 | Phase 01-foundations P06 | 22 min | - tasks | - files |
 | Phase 1 P08 | 11min | 3 tasks | 19 files |
+| Phase 01-foundations P07 | ~15min | - tasks | - files |
 
 ## Accumulated Context
 
@@ -100,6 +101,11 @@ Recent decisions affecting current work:
 - [Phase ?]: W-4 SHA-256 pin enforced at two layers (build script + canary test) for vendored gitleaks-rules.toml
 - [Phase ?]: schema_hash via field-name set hash (Open Question 3 option a) for CAP-15 drift detection
 - [Phase ?]: Bearer-token log sanitiser strips Bearer tokens from any Error message before forwarding to logError (threat T-06-06)
+- [Phase ?]: [Phase 01]: 01-07 — Go shim binary is 5.1MB (Go runtime + net/http stdlib floor); DAE-18 ≤15ms TIME contract is load-bearing, not file size.
+- [Phase ?]: [Phase 01]: 01-07 — Loopback bridge binds 127.0.0.1 ONLY; X-Fennec-Shim-Secret header validated per POST; shim secret at /etc/fennec/shim-secret mode 0644 (Pattern 9 same-UID threat model)
+- [Phase ?]: [Phase 01]: 01-07 — Claude Code adapter is normalisation-only; redaction lives in registry's emit chain. All 4 Anthropic Usage tokens preserved VERBATIM per A2 option c — no aggregation, no totals.
+- [Phase ?]: [Phase 01]: 01-07 — Managed-settings install is additive (D-20 synapse coexistence); uninstall is surgical (D-24 — filter by command-equality + unlink when empty). Byte-equal SHA-256 on user-settings asserts DAE-11.
+- [Phase ?]: [Phase 01]: 01-07 — Concurrent commit race during lint-staged: 4 RED test files cross-attributed to 01-08 commit 2860d40. Functionally correct; audit-trail misaligned (documented in 01-07 SUMMARY Deviation #2).
 
 ### Pending Todos
 
@@ -124,6 +130,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T07:53:57.182Z
-Stopped at: Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED.
+Last session: 2026-05-31T07:59:11.113Z
+Stopped at: Plan 01-07 complete: Claude Code hook adapter — Go shim + loopback bridge + payload normaliser + managed-settings install/uninstall. 4 tasks, 6 commits owned, 136/136 daemon tests pass, 4/4 Go tests pass.
 Resume file: None
