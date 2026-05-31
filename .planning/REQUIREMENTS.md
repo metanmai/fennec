@@ -123,7 +123,7 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **DAE-17**: Daemon writes Claude Code hook entries to managed-settings layer at install time (`/Library/Application Support/ClaudeCode/managed-settings.json` macOS, `/etc/claude-code/managed-settings.json` Linux, `%ProgramData%\ClaudeCode\managed-settings.json` Windows), root/SYSTEM-owned, user-read-only
 - [ ] **DAE-18**: Hook handler is a compiled shim binary at `/usr/local/fennec/bin/fennec-hook` (Windows: `C:\Program Files\fennec\bin\fennec-hook.exe`) that IPCs to the running daemon via loopback bridge (HTTP or Unix socket) with ≤15ms overhead per hook fire; fails open if daemon is unreachable (Claude Code never blocked)
 - [ ] **DAE-19**: `fennec uninstall` removes only fennec's entries from managed-settings (surgical, leaves synapse user-settings untouched), requires the org-token in org-tier installs or sudo in personal-tier, and emits an audit event visible to the org admin
-- [ ] **DAE-20**: Daemon surfaces a system tray notification when no developer identity is attached after enrollment; the notification persists across reboots until SSO attach completes (see AUTH-16)
+- [x] **DAE-20**: Daemon surfaces a system tray notification when no developer identity is attached after enrollment; the notification persists across reboots until SSO attach completes (see AUTH-16)
 - [ ] **DAE-21**: MDM packaging primitives in Phase 1 — the signed `.pkg` accepts an org install secret via a documented config-key schema; polished Jamf Configuration Profile, Intune ADMX, and Workspace ONE manifest templates land in Phase 5
 
 ### Distribution (DIST)
@@ -311,7 +311,7 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | DAE-17 | Phase 1 | Pending |
 | DAE-18 | Phase 1 | Pending |
 | DAE-19 | Phase 1 | Pending |
-| DAE-20 | Phase 1 | Pending |
+| DAE-20 | Phase 1 | Complete |
 | DAE-21 | Phase 1 | Pending |
 | DIST-01 | Phase 6 | Pending |
 | DIST-02 | Phase 6 | Pending |

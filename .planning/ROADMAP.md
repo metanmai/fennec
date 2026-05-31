@@ -58,7 +58,7 @@ Plans:
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [ ] 01-07-PLAN.md — Claude Code adapter: Go hook shim (≤15ms fail-open), daemon loopback bridge (127.0.0.1 + X-Fennec-Shim-Secret), payload normaliser for all 6 D-22 hooks (4 token fields preserved separately), managed-settings install/uninstall (additive merge, synapse coexistence)
-- [ ] 01-08-PLAN.md — Daemon identity: enrollment client, /var/db/fennec/key with mode-0400 root-only re-check (Pitfall 10), machine-id via IOPlatformUUID, PKCE generation, one-shot loopback OAuth server, attach flow + uninstall emitter, Helper LaunchAgent notifier (Go binary, osascript + open URL)
+- [x] 01-08-PLAN.md — Daemon identity: enrollment client, /var/db/fennec/key with mode-0400 root-only re-check (Pitfall 10), machine-id via IOPlatformUUID, PKCE generation, one-shot loopback OAuth server, attach flow + uninstall emitter, Helper LaunchAgent notifier (Go binary, osascript + open URL)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations | 6/10 | In Progress|  |
+| 1. Foundations | 7/10 | In Progress|  |
 | 2. Parallel Adapters + Backend Analysis | 0/TBD | Not started | - |
 | 3. Multi-Tenant Backend Maturity | 0/TBD | Not started | - |
 | 4. Dashboards | 0/TBD | Not started | - |
