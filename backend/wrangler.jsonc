@@ -1,8 +1,55 @@
+// =============================================================================
+// fennec backend — Cloudflare Workers config.
+//
+// Phase 1 Plan 01-05 wiring:
+//   * Hyperdrive binding (HYPERDRIVE) -> Supabase Postgres direct-connection URL.
+//     The Worker reads `env.HYPERDRIVE.connectionString` and creates a per-request
+//     `pg.Client` instance (see backend/src/db/client.ts). Hyperdrive eliminates
+//     the 50-150ms per-request TCP+TLS handshake to Supabase per STACK.md.
+//   * Workers KV namespace (OAUTH_STATE_KV) -> short-lived PKCE state for the
+//     dev-OAuth attach flow. 10-minute TTL per Plan 01-05 spec.
+//   * compatibility_flags: ["nodejs_compat"] -- required by `pg` (uses node:net,
+//     node:tls, node:crypto, node:stream internally).
+//
+// REQUIRED SECRETS -- set via `wrangler secret put <NAME>` before first deploy:
+//   FENNEC_BASE_URL                 -- public URL of this Worker; used in privacy_policy_url
+//                                      and SSO redirect URIs (e.g. https://api.fennec.dev)
+//   OAUTH_GOOGLE_CLIENT_ID          -- Google OAuth client id (web app type)
+//   OAUTH_GOOGLE_CLIENT_SECRET      -- Google OAuth client secret
+//   OAUTH_GITHUB_CLIENT_ID          -- GitHub OAuth app client id
+//   OAUTH_GITHUB_CLIENT_SECRET      -- GitHub OAuth app client secret
+//   OAUTH_MICROSOFT_CLIENT_ID       -- Microsoft Entra app (multi-tenant) client id
+//   OAUTH_MICROSOFT_CLIENT_SECRET   -- Microsoft Entra app client secret
+//
+// IDs below are placeholders. Run:
+//   wrangler hyperdrive create fennec-supabase --connection-string="<supabase-postgres-direct-connection>"
+//   wrangler kv namespace create OAUTH_STATE_KV
+// then paste the printed ids into the `id` fields below before `wrangler deploy`
+// (deploy lives in Plan 01-10; this plan only authors + tests).
+//
+// Phase 2 will add the cloudflare/queues binding for correlation + model-fit
+// consumers. The block is left commented so the surface is visible.
+// =============================================================================
 {
-  // Skeleton wrangler config — Hyperdrive, Queues, Analytics Engine bindings
-  // and the production `routes` array arrive with plan 01-05.
   "name": "fennec-backend",
   "main": "src/index.ts",
   "compatibility_date": "2026-05-31",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "PLACEHOLDER_RUN_wrangler_hyperdrive_create"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_STATE_KV",
+      "id": "PLACEHOLDER_RUN_wrangler_kv_namespace_create"
+    }
+  ]
+  // Phase 2 queue bindings (correlation + model-fit consumers); leave commented
+  // so the future surface is visible but the Worker boots without them.
+  // "queues": {
+  //   "producers": [{ "binding": "CORRELATION_QUEUE", "queue": "fennec-correlation" }]
+  // }
 }

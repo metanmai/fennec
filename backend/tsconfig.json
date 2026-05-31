@@ -2,7 +2,9 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "lib": ["ES2022", "WebWorker"],
+    "types": ["@cloudflare/workers-types"]
   },
   "include": ["src/**/*"],
   "references": [{ "path": "../packages/shared" }]

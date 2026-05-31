@@ -6,12 +6,20 @@
   "scripts": {
     "build": "tsc --build",
     "test": "vitest run",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
   },
   "dependencies": {
-    "@fennec/shared": "*"
+    "@fennec/shared": "*",
+    "@hono/zod-validator": "0.8.0",
+    "@supabase/supabase-js": "2.106.2",
+    "hono": "4.12.23",
+    "pg": "8.21.0",
+    "zod": "4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "4.20260531.1",
+    "@types/pg": "8.20.0",
     "wrangler": "4.93.1"
   }
 }
