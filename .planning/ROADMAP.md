@@ -48,7 +48,7 @@ Plans:
 
 - [x] 01-02-PLAN.md — Canonical event schema in @fennec/shared (CanonicalEvent, AdapterHeartbeat, Enroll/Attach/Uninstall request schemas, deriveIdempotencyKey, ANL-06 separate cache token fields)
 - [ ] 01-03-PLAN.md — Code-signing procurement: Apple Developer Program enrolment + Developer ID Installer cert + notarytool keychain profile; Windows EV cert procurement + first-signature SmartScreen clock start
-- [ ] 01-04-PLAN.md — Supabase schema migrations: orgs/users/keys, partitioned ai_events + git_events, adapter_heartbeats, daemon_audit_events, RLS policies on all 10 customer-data tables, Phase 1 seed test data
+- [x] 01-04-PLAN.md — Supabase schema migrations: orgs/users/keys, partitioned ai_events + git_events, adapter_heartbeats, daemon_audit_events, RLS policies on all 10 customer-data tables, Phase 1 seed test data
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations | 2/10 | In Progress|  |
+| 1. Foundations | 3/10 | In Progress|  |
 | 2. Parallel Adapters + Backend Analysis | 0/TBD | Not started | - |
 | 3. Multi-Tenant Backend Maturity | 0/TBD | Not started | - |
 | 4. Dashboards | 0/TBD | Not started | - |

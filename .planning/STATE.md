@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed Plan 01-02 (canonical event schema in @fennec/shared)
-last_updated: "2026-05-31T05:54:06.136Z"
+stopped_at: "Completed Plan 01-04 (Supabase schema migrations: 7 migrations, 10/10 RLS, partitioned ai_events + git_events, Phase 1 seed)"
+last_updated: "2026-05-31T06:04:40.045Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 10
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 1 of 6 (Foundations)
-Plan: 3 of 10 in current phase
+Plan: 4 of 10 in current phase
 Status: Ready to execute
 Last activity: 2026-05-31
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [██░░░░░░░░] 20%
 *Updated after each plan completion*
 | Phase 1 P1 | 11 | 4 tasks | 21 files |
 | Phase 01 P02 | 33 min | 2 tasks | 12 files |
+| Phase 01 P04 | ~4 min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,10 @@ Recent decisions affecting current work:
 - [Phase ?]: 01-02 — Anthropic Usage cache tokens captured as 4 SEPARATE optional non-negative ints (ANL-06 / T-02-03 / PITFALL P6); Assumption A2 totals deferred to Plan 01-06
 - [Phase ?]: 01-02 — CanonicalEventSchema OMITS org_id/user_id (backend stamps tenancy from api_key lookup per Pattern 11 / threat T-02-01)
 - [Phase ?]: 01-02 — PKCE verifier enforced 43-128 chars per RFC 7636 4.1 on AttachCallbackRequestSchema; AdapterHeartbeat counters required-not-optional even at zero
+- [Phase 01]: 01-04: timestamped migration ordering (20260531000001..7) matches Supabase CLI + psql -f glob order; ai_events PK is (idempotency_key, occurred_at) so partition col is in the unique constraint and the composite doubles as Plan 05's ON CONFLICT clause
+- [Phase 01]: 01-04: RLS ENABLE + tenant-isolation CREATE POLICY on all 10 customer-data tables from day 1 (D-26/PITFALL P5); users uses USING(TRUE) placeholder until Phase 3 adds org_members JOIN; orgs uses id=jwt.org_id since orgs.id IS the tenant
+- [Phase 01]: 01-04: hashes computed in SQL via pgcrypto.digest() in the seed migration (single source of truth = plaintext); ai_events/git_events range-partitioned by occurred_at with current+next month for ai_events and current month only for git_events
+- [Phase 01]: 01-04: api_keys partial UNIQUE index on token_hash WHERE revoked_at IS NULL keeps bearer-auth lookup fast as revocation history grows; daemon_audit_events.daemon_machine_id NULLABLE (no CASCADE) so post-uninstall audits survive
 
 ### Pending Todos
 
@@ -98,6 +103,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T05:54:06.130Z
-Stopped at: Completed Plan 01-02 (canonical event schema in @fennec/shared)
+Last session: 2026-05-31T06:04:40.039Z
+Stopped at: Completed Plan 01-04 (Supabase schema migrations: 7 migrations, 10/10 RLS, partitioned ai_events + git_events, Phase 1 seed)
 Resume file: None

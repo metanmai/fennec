@@ -59,7 +59,7 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **AUTH-12**: Every customer-data table enforces RLS as a defense-in-depth backstop (middleware is primary, RLS is belt-and-suspenders)
 - [ ] **AUTH-13**: Same user on multiple machines reports under one identity; cross-machine identity merge UI exists for the rare wrong-link edge case
 - [ ] **AUTH-14**: Backend exposes `POST /api/daemons/enroll` accepting `{ install_secret, machine_id, hostname }` and returning a per-machine API key (org-tier install secret comes from the MDM payload; personal-tier install secret is self-issued by the first-run wizard)
-- [ ] **AUTH-15**: Per-machine API key is stored in a system-protected disk location (root-only readable: `/var/db/fennec/key` macOS, `/var/lib/fennec/key` Linux, `%ProgramData%\fennec\key` Windows)
+- [x] **AUTH-15**: Per-machine API key is stored in a system-protected disk location (root-only readable: `/var/db/fennec/key` macOS, `/var/lib/fennec/key` Linux, `%ProgramData%\fennec\key` Windows)
 - [ ] **AUTH-16**: Dev-OAuth attach flow — on first un-attached boot, daemon surfaces a system tray notification, auto-opens the default browser to the SSO flow (Google / GitHub / Microsoft), and binds the resolved user identity to the per-machine API key; events captured before attach are tagged `unknown@${hostname}` and backfilled on first successful attach
 
 ### Ingestion (ING)
@@ -68,8 +68,8 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **ING-02**: Ingest dedupes events by `idempotency_key` (writes are upserts, not inserts)
 - [ ] **ING-03**: Ingest validates payloads against the shared Zod schema; invalid batches are rejected with 4xx and a clear reason
 - [ ] **ING-04**: Ingest is dumb — no correlation or model-fit analysis runs in the hot path; events are enqueued onto a Cloudflare Queue for async workers
-- [ ] **ING-05**: `ai_events` table is range-partitioned by month on `occurred_at`
-- [ ] **ING-06**: `git_events` table is range-partitioned by month on `occurred_at`
+- [x] **ING-05**: `ai_events` table is range-partitioned by month on `occurred_at`
+- [x] **ING-06**: `git_events` table is range-partitioned by month on `occurred_at`
 - [ ] **ING-07**: Self-host build runs ingest via Hono-on-Node (or workerd) and a Postgres-backed Queue abstraction (pgmq / graphile-worker) — same code path, deployment-topology variation
 
 ### Analysis (ANL)
@@ -259,14 +259,14 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | AUTH-12 | Phase 3 | Pending |
 | AUTH-13 | Phase 3 | Pending |
 | AUTH-14 | Phase 1 | Pending |
-| AUTH-15 | Phase 1 | Pending |
+| AUTH-15 | Phase 1 | Complete |
 | AUTH-16 | Phase 1 | Pending |
 | ING-01 | Phase 1 | Pending |
 | ING-02 | Phase 1 | Pending |
 | ING-03 | Phase 1 | Pending |
 | ING-04 | Phase 1 | Pending |
-| ING-05 | Phase 1 | Pending |
-| ING-06 | Phase 1 | Pending |
+| ING-05 | Phase 1 | Complete |
+| ING-06 | Phase 1 | Complete |
 | ING-07 | Phase 6 | Pending |
 | ANL-01 | Phase 2 | Pending |
 | ANL-02 | Phase 2 | Pending |
