@@ -1,13 +1,15 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
   "files": {
-    "ignore": [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/.wrangler/**",
-      "**/coverage/**",
-      "**/*.tsbuildinfo",
-      "**/.husky/_/**"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/.wrangler",
+      "!**/coverage",
+      "!**/*.tsbuildinfo",
+      "!**/.husky/_",
+      "!**/package-lock.json"
     ]
   },
   "linter": {
@@ -29,7 +31,12 @@
       "trailingCommas": "all"
     }
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   }
 }

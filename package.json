@@ -20,8 +20,8 @@
     "typecheck": "tsc --build",
     "build": "tsc --build",
     "clean": "tsc --build --clean && rm -rf */dist packages/*/dist",
-    "test": "vitest run",
-    "test:unit": "vitest run --reporter=dot",
+    "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --reporter=dot --passWithNoTests",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "prepare": "husky"
