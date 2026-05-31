@@ -52,7 +52,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-05-PLAN.md — Backend Hono Worker: POST /api/events/batch + heartbeats + daemons/enroll + attach-start + attach-callback + daemons/uninstall; Hyperdrive→Postgres, OAuth-state KV, Zod validation, idempotent upserts
+- [x] 01-05-PLAN.md — Backend Hono Worker: POST /api/events/batch + heartbeats + daemons/enroll + attach-start + attach-callback + daemons/uninstall; Hyperdrive→Postgres, OAuth-state KV, Zod validation, idempotent upserts
 - [ ] 01-06-PLAN.md — Daemon core: adapter registry, JSONL queue + watermark + rotation, gitleaks-style redactor (10-canary verified), sync loop (100/5s, backoff), heartbeat emitter, schema-hash drift, NODE_EXTRA_CA_CERTS + HTTPS_PROXY honoring
 
 **Wave 4** *(blocked on Wave 3 completion)*
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations | 4/10 *(01-03 autonomous-only; procurement gated)* | In Progress|  |
+| 1. Foundations | 5/10 | In Progress|  |
 | 2. Parallel Adapters + Backend Analysis | 0/TBD | Not started | - |
 | 3. Multi-Tenant Backend Maturity | 0/TBD | Not started | - |
 | 4. Dashboards | 0/TBD | Not started | - |

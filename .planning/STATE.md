@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: "Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED."
-last_updated: "2026-05-31T06:18:14.973Z"
+last_updated: "2026-05-31T06:56:58.959Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 10
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 1 of 6 (Foundations)
-Plan: 4 of 10 in current phase
+Plan: 5 of 10 in current phase
 Status: Ready to execute
 Last activity: 2026-05-31
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [████░░░░░░] 40%
 | Phase 01 P02 | 33 min | 2 tasks | 12 files |
 | Phase 01 P04 | ~4 min | 2 tasks | 10 files |
 | Phase 01 P03 | 7m | 1 of 3 (Task 3 done; Tasks 1+2 procurement-gated) tasks | 7 files |
+| Phase 01 P05 | ~25 min | 3 tasks | 29 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,12 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-03 — Phase 1 Win EV acceptance recalibrated per Pitfall 4 (Microsoft SmartScreen March 2024 policy change): success criterion is cert procured + first signature + signtool verify, NOT full reputation. Full reputation is a Phase 5 emergent outcome after .msi distribution accumulates downloads.
 - [Phase 01]: 01-03 — vendor recommendation: DigiCert (fastest + KeyLocker cloud signing avoids HSM shipping), Sectigo (best price-to-delivery for indie devs), Certera (cheapest CA/B Forum option). Cloud signing preferred over USB HSM where budget permits.
 - [Phase 01]: 01-03 — Pitfall 11 (notarytool --wait) hardcoded in installer/macos/sign-test-artefact.sh; App Store Connect .p8 lives at ~/.config/fennec-keys/ chmod 400 OUTSIDE the repo (T-03-03); .gitignore already excludes *.p8
+- [Phase ?]: [Phase 01]: 01-05 — all three OAuth providers (Google + GitHub + Microsoft) wired in attach-start/callback; daemon picks per-smoke; backend provider-agnostic
+- [Phase ?]: [Phase 01]: 01-05 — re-enrollment ALWAYS rotates api_key (REVOKE prior + ISSUE fresh) because backend stores only token_hash; W-3 amendment clarifies plan-text 'same machine → same key'
+- [Phase ?]: [Phase 01]: 01-05 — W-2 mitigation option C: integration tests against live Hyperdrive deferred to Plan 01-10 smoke; Plan 01-05 ships hermetic unit tests with mocked pg.Client + KV
+- [Phase ?]: [Phase 01]: 01-05 — org_id ALWAYS from auth context (c.get), NEVER from request body (T-05-02); unit test asserts hostile events[i].org_id is ignored
+- [Phase ?]: [Phase 01]: 01-05 — hot-path purity enforced by static-grep test on events-batch.ts source (no correlation/model-fit/aggregator imports — ING-04)
+- [Phase ?]: [Phase 01]: 01-05 — attach-callback resolves daemon_machine by machine_id alone; PKCE + state-KV TTL gate the path; residual attacker-binds-victim-to-attacker-org annoyance documented and accepted
 
 ### Pending Todos
 
@@ -109,6 +116,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T06:18:14.967Z
+Last session: 2026-05-31T06:56:45.238Z
 Stopped at: Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED.
-Resume file: installer/macos/CERT-PROCUREMENT.md + installer/windows/CERT-PROCUREMENT.md
+Resume file: None
