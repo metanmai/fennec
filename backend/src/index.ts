@@ -17,7 +17,10 @@
  */
 
 import { Hono } from "hono";
+import attachCallbackApp from "./api/attach-callback.js";
+import attachStartApp from "./api/attach-start.js";
 import daemonsEnrollApp from "./api/daemons-enroll.js";
+import daemonsUninstallApp from "./api/daemons-uninstall.js";
 import eventsBatchApp from "./api/events-batch.js";
 import heartbeatsApp from "./api/heartbeats.js";
 import type { Env, Variables } from "./env.js";
@@ -29,7 +32,8 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 app.route("/", eventsBatchApp);
 app.route("/", heartbeatsApp);
 app.route("/", daemonsEnrollApp);
-// Task 3 routes (attach-start, attach-callback, daemons-uninstall) get mounted
-// alongside this list as soon as Plan 01-05 Task 3 lands their handler modules.
+app.route("/", attachStartApp);
+app.route("/", attachCallbackApp);
+app.route("/", daemonsUninstallApp);
 
 export default app;

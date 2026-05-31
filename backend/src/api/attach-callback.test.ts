@@ -52,8 +52,13 @@ function installDefaultHandler() {
     if (/INSERT\s+INTO\s+org_members/i.test(sql)) {
       return { rows: [], rowCount: 1 };
     }
-    if (/SELECT\s+id,\s*hostname\s+FROM\s+daemon_machines/i.test(sql)) {
-      return { rows: [{ id: TEST_MACHINE, hostname: "phase1-host" }], rowCount: 1 };
+    // The callback handler resolves the machine by machine_id alone (no org
+    // scope at this point -- it's the lookup that DISCOVERS the org_id).
+    if (/SELECT\s+id,\s*org_id,\s*hostname\s+FROM\s+daemon_machines/i.test(sql)) {
+      return {
+        rows: [{ id: TEST_MACHINE, org_id: TEST_ORG, hostname: "phase1-host" }],
+        rowCount: 1,
+      };
     }
     if (/UPDATE\s+daemon_machines\s+SET\s+attached_user_id/i.test(sql)) {
       return { rows: [], rowCount: 1 };
@@ -222,8 +227,12 @@ describe("POST /api/daemons/attach-callback (AUTH-16 callback)", () => {
     mockHandle.setHandler((sql) => {
       if (/INSERT\s+INTO\s+users/i.test(sql)) return { rows: [{ id: RESOLVED_USER_ID }], rowCount: 1 };
       if (/INSERT\s+INTO\s+org_members/i.test(sql)) return { rows: [], rowCount: 1 };
-      if (/SELECT\s+id,\s*hostname\s+FROM\s+daemon_machines/i.test(sql))
-        return { rows: [{ id: TEST_MACHINE, hostname: "phase1-host" }], rowCount: 1 };
+      if (/SELECT\s+id,\s*org_id,\s*hostname\s+FROM\s+daemon_machines/i.test(sql)) {
+        return {
+          rows: [{ id: TEST_MACHINE, org_id: TEST_ORG, hostname: "phase1-host" }],
+          rowCount: 1,
+        };
+      }
       if (/UPDATE\s+daemon_machines/i.test(sql)) return { rows: [], rowCount: 1 };
       if (/UPDATE\s+ai_events/i.test(sql)) {
         backfillRowCount = 5;
