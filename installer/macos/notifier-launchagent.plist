@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  fennec Helper LaunchAgent (Plan 01-08 Task 3, DAE-20, Pattern 6).
+
+  Loaded as the LOGGED-IN USER (NOT root), because macOS LaunchDaemons
+  cannot interact with the GUI / Aqua session. Lives under
+  /Library/LaunchAgents/ so it loads for every user that signs in
+  on this machine.
+
+  Lifecycle:
+    - RunAtLoad: launchd starts the notifier the moment the user
+      session boots (login or fast user switch).
+    - KeepAlive: launchd respawns the process if it dies.
+    - The fennec LaunchDaemon (root) talks to this Agent via
+      127.0.0.1:7822/v1/notify.
+
+  See also Plan 01-09 (installer/postinstall): installs the binary at
+  /usr/local/fennec/bin/fennec-notifier root:wheel mode 0755, places
+  this plist at /Library/LaunchAgents/com.fennec.notifier.plist
+  root:wheel mode 0644, then `launchctl bootstrap gui/$UID ...`.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fennec.notifier</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/fennec/bin/fennec-notifier</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/fennec-notifier.out.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/fennec-notifier.err.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>FENNEC_NOTIFIER_PORT</key>
+        <string>7822</string>
+    </dict>
+</dict>
+</plist>
