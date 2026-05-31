@@ -202,16 +202,119 @@ Explicitly excluded from v1 and v2. Documented to prevent scope creep.
 
 ## Traceability
 
-(populated by roadmapper during ROADMAP creation)
+Mapped by roadmapper on 2026-05-31. Every v1 REQ-ID maps to exactly one phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| CAP-01 | Phase 1 | Pending |
+| CAP-02 | Phase 1 | Pending |
+| CAP-03 | Phase 2 | Pending |
+| CAP-04 | Phase 2 | Pending |
+| CAP-05 | Phase 2 | Pending |
+| CAP-06 | Phase 2 | Pending |
+| CAP-07 | Phase 2 | Pending |
+| CAP-08 | Phase 2 | Pending |
+| CAP-09 | Phase 2 | Pending |
+| CAP-10 | Phase 1 | Pending |
+| CAP-11 | Phase 1 | Pending |
+| CAP-12 | Phase 1 | Pending |
+| CAP-13 | Phase 1 | Pending |
+| CAP-14 | Phase 1 | Pending |
+| CAP-15 | Phase 1 | Pending |
+| CAP-16 | Phase 1 | Pending |
+| CAP-17 | Phase 2 | Pending |
+| CAP-18 | Phase 2 | Pending |
+| PRIV-01 | Phase 1 | Pending |
+| PRIV-02 | Phase 3 | Pending |
+| PRIV-03 | Phase 3 | Pending |
+| PRIV-04 | Phase 3 | Pending |
+| PRIV-05 | Phase 3 | Pending |
+| PRIV-06 | Phase 3 | Pending |
+| PRIV-07 | Phase 1 | Pending |
+| AUTH-01 | Phase 3 | Pending |
+| AUTH-02 | Phase 3 | Pending |
+| AUTH-03 | Phase 3 | Pending |
+| AUTH-04 | Phase 3 | Pending |
+| AUTH-05 | Phase 3 | Pending |
+| AUTH-06 | Phase 3 | Pending |
+| AUTH-07 | Phase 3 | Pending |
+| AUTH-08 | Phase 3 | Pending |
+| AUTH-09 | Phase 1 | Pending |
+| AUTH-10 | Phase 1 | Pending |
+| AUTH-11 | Phase 3 | Pending |
+| AUTH-12 | Phase 3 | Pending |
+| AUTH-13 | Phase 3 | Pending |
+| ING-01 | Phase 1 | Pending |
+| ING-02 | Phase 1 | Pending |
+| ING-03 | Phase 1 | Pending |
+| ING-04 | Phase 1 | Pending |
+| ING-05 | Phase 1 | Pending |
+| ING-06 | Phase 1 | Pending |
+| ING-07 | Phase 6 | Pending |
+| ANL-01 | Phase 2 | Pending |
+| ANL-02 | Phase 2 | Pending |
+| ANL-03 | Phase 2 | Pending |
+| ANL-04 | Phase 2 | Pending |
+| ANL-05 | Phase 2 | Pending |
+| ANL-06 | Phase 1 | Pending |
+| ANL-07 | Phase 2 | Pending |
+| ANL-08 | Phase 2 | Pending |
+| ANL-09 | Phase 2 | Pending |
+| DASH-01 | Phase 4 | Pending |
+| DASH-02 | Phase 4 | Pending |
+| DASH-03 | Phase 4 | Pending |
+| DASH-04 | Phase 4 | Pending |
+| DASH-05 | Phase 4 | Pending |
+| DASH-06 | Phase 4 | Pending |
+| DASH-07 | Phase 4 | Pending |
+| DASH-08 | Phase 4 | Pending |
+| DASH-09 | Phase 4 | Pending |
+| DASH-10 | Phase 4 | Pending |
+| DASH-11 | Phase 4 | Pending |
+| DASH-12 | Phase 4 | Pending |
+| DASH-13 | Phase 4 | Pending |
+| DASH-14 | Phase 4 | Pending |
+| DASH-15 | Phase 4 | Pending |
+| DAE-01 | Phase 1 | Pending |
+| DAE-02 | Phase 1 | Pending |
+| DAE-03 | Phase 4 | Pending |
+| DAE-04 | Phase 5 | Pending |
+| DAE-05 | Phase 1 | Pending |
+| DAE-06 | Phase 5 | Pending |
+| DAE-07 | Phase 5 | Pending |
+| DAE-08 | Phase 5 | Pending |
+| DAE-09 | Phase 5 | Pending |
+| DAE-10 | Phase 1 | Pending |
+| DAE-11 | Phase 1 | Pending |
+| DAE-12 | Phase 1 | Pending |
+| DIST-01 | Phase 6 | Pending |
+| DIST-02 | Phase 6 | Pending |
+| DIST-03 | Phase 6 | Pending |
+| DIST-04 | Phase 6 | Pending |
+| DIST-05 | Phase 6 | Pending |
+| DIST-06 | Phase 6 | Pending |
+| DIST-07 | Phase 6 | Pending |
+| DIST-08 | Phase 6 | Pending |
+| DIST-09 | Phase 6 | Pending |
+| DIST-10 | Phase 6 | Pending |
+| DIST-11 | Phase 6 | Pending |
+| DIST-12 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: TBD by roadmapper
-- Mapped to phases: TBD
-- Unmapped: TBD
+- v1 requirements: 93
+- Mapped to phases: 93 (100%)
+- Unmapped: 0
+
+**Per-phase counts:**
+- Phase 1 (Foundations): 26 requirements (CAP-01, CAP-02, CAP-10..16, PRIV-01, PRIV-07, AUTH-09, AUTH-10, ING-01..06, ANL-06, DAE-01, DAE-02, DAE-05, DAE-10, DAE-11, DAE-12)
+- Phase 2 (Parallel Adapters + Backend Analysis): 17 requirements (CAP-03..09, CAP-17, CAP-18, ANL-01..05, ANL-07, ANL-08, ANL-09)
+- Phase 3 (Multi-Tenant Backend Maturity): 16 requirements (AUTH-01..08, AUTH-11..13, PRIV-02..06)
+- Phase 4 (Dashboards): 16 requirements (DASH-01..15, DAE-03)
+- Phase 5 (Cross-Platform Daemon Polish): 5 requirements (DAE-04, DAE-06..09)
+- Phase 6 (Self-Host Distribution + License + Public Repo): 13 requirements (ING-07, DIST-01..12)
+
+Sum: 26 + 17 + 16 + 16 + 5 + 13 = 93 ✓
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 after initialization*
+*Last updated: 2026-05-31 — traceability populated by roadmapper*
