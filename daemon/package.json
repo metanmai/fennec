@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./dist/index.js",
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build && node scripts/copy-assets.mjs",
+    "build:gitleaks-rules": "node scripts/build-gitleaks-rules.mjs",
     "test": "vitest run"
   },
   "dependencies": {
