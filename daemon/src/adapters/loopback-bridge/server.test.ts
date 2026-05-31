@@ -29,10 +29,10 @@ async function listenOnEphemeralPort(bridge: LoopbackBridge): Promise<{ host: st
 
 describe("LoopbackBridge", () => {
   let bridge: LoopbackBridge;
-  let logger: ReturnType<typeof vi.fn>;
+  let logger: ReturnType<typeof vi.fn<(...args: unknown[]) => void>>;
 
   beforeEach(() => {
-    logger = vi.fn();
+    logger = vi.fn<(...args: unknown[]) => void>();
   });
 
   afterEach(async () => {
