@@ -53,8 +53,8 @@ describe("EnrollResponseSchema", () => {
   it("validates a well-formed response", () => {
     const r = EnrollResponseSchema.safeParse({
       api_key: "fk_live_abc123",
-      api_key_id: "11111111-2222-3333-4444-555555555555",
-      org_id: "00000000-1111-2222-3333-444444444444",
+      api_key_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      org_id: "550e8400-e29b-41d4-a716-446655440000",
       org_name: "Acme Corp",
       privacy_policy_url: "https://fennec.dev/privacy/00000000-1111-2222-3333-444444444444",
     });
@@ -75,8 +75,8 @@ describe("EnrollResponseSchema", () => {
   it("rejects non-URL privacy_policy_url", () => {
     const r = EnrollResponseSchema.safeParse({
       api_key: "fk_live_abc123",
-      api_key_id: "11111111-2222-3333-4444-555555555555",
-      org_id: "00000000-1111-2222-3333-444444444444",
+      api_key_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      org_id: "550e8400-e29b-41d4-a716-446655440000",
       org_name: "Acme",
       privacy_policy_url: "not a url",
     });
@@ -160,18 +160,18 @@ describe("AttachCallbackRequestSchema (AUTH-16 / RFC 7636 PKCE)", () => {
 describe("AttachCallbackResponseSchema", () => {
   it("validates a well-formed response", () => {
     const r = AttachCallbackResponseSchema.safeParse({
-      user_id: "11111111-2222-3333-4444-555555555555",
+      user_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
       email: "dev@example.com",
-      org_id: "00000000-1111-2222-3333-444444444444",
+      org_id: "550e8400-e29b-41d4-a716-446655440000",
     });
     expect(r.success).toBe(true);
   });
 
   it("rejects non-email", () => {
     const r = AttachCallbackResponseSchema.safeParse({
-      user_id: "11111111-2222-3333-4444-555555555555",
+      user_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
       email: "not-an-email",
-      org_id: "00000000-1111-2222-3333-444444444444",
+      org_id: "550e8400-e29b-41d4-a716-446655440000",
     });
     expect(r.success).toBe(false);
   });
