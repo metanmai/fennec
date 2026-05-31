@@ -1,8 +1,11 @@
 /**
- * @fennec/shared — canonical event schema, heartbeat types, and cross-tier
- * contracts shared between the daemon (Node) and the backend (Cloudflare
- * Workers). Phase 1 Plan 01-01 (Wave 0) ships only this placeholder so
- * `tsc --build` produces output and Vitest discovers the workspace. The
- * real `CanonicalEvent` / `AdapterHeartbeat` Zod schemas land in plan 01-02.
+ * @fennec/shared — canonical event schema, heartbeat types, and
+ * cross-tier contracts shared between the daemon (Node 22) and the
+ * backend (Cloudflare Workers). Runtime-neutral: zod only, no `node:*`
+ * imports, so Workers can consume it without polyfills.
  */
-export const PLACEHOLDER_VERSION = "0.1.0";
+
+export * from "./events/canonical.js";
+export * from "./events/claude-code-payload.js";
+export * from "./events/heartbeat.js";
+export * from "./events/kinds.js";
