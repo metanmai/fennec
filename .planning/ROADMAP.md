@@ -66,7 +66,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 01-10-PLAN.md — End-to-end smoke: `[BLOCKING]` supabase db push, wrangler deploy, install signed pkg, run wizard, exercise all 7 ROADMAP success criteria (prompt → ai_events row, canary redaction, kill-9 idempotency, heartbeats, synapse coexistence, surgical uninstall + audit)
+- [~] 01-10-PLAN.md — End-to-end smoke: `[BLOCKING]` supabase db push, wrangler deploy, install signed pkg, run wizard, exercise all 7 ROADMAP success criteria *(autonomous Task 1 shipped — db-push wrapper + signed-pkg verifier + Playwright spec + 25 locally-runnable tests (canary + synapse-coexistence + kill-9 idempotency) all green + 3 manual scripts + README; Tasks 2-5 HALT at `gate="blocking-human"` checkpoints awaiting Supabase project + Cloudflare account + Apple Dev cert + signed .pkg + live Claude Code — see `.planning/phases/01-foundations/01-10-SUMMARY.md`)*
 
 ### Phase 2: Parallel Adapters + Backend Analysis Layer
 

@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Plan 01-07 complete: Claude Code hook adapter — Go shim + loopback bridge + payload normaliser + managed-settings install/uninstall. 4 tasks, 6 commits owned, 136/136 daemon tests pass, 4/4 Go tests pass."
-last_updated: "2026-05-31T08:21:10.910Z"
+stopped_at: "Plan 01-10 PARTIAL: Phase 1 smoke harness shipped (Task 1) — 25 locally-runnable tests green; Tasks 2-5 HALT for real Supabase + Cloudflare + Apple Dev cert + Claude Code. Locally-runnable subset (canary, synapse-coexistence, kill-9 idempotency) green; live tier (01-phase-1-smoke.spec.ts) authored + Playwright sees it but cannot run without infra."
+last_updated: "2026-05-31T14:10:00.000Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
@@ -111,6 +111,9 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 01]: 01-09 — CLI dispatcher in daemon/src/index.ts runs iff fileURLToPath(import.meta.url)===argv[1]; library imports stay no-op
 - [Phase ?]: [Phase 01]: 01-09 — Configuration.plist ships as MDM PRIMITIVE per D-09 with REPLACE_WITH_* placeholders; polished Jamf/Intune templates land in Phase 5
 - [Phase ?]: [Phase 01]: 01-09 PARTIAL — Tasks 1+2 complete; Task 3 UNSIGNED .pkg built (SHA-256 5b25f5bd...); HALT on signed step pending Apple Dev Program enrolment
+- [Phase 01]: 01-10 PARTIAL — Task 1 autonomous complete (scripts/db-push.sh + tests/ci/verify-signed-pkg.sh + 4 e2e files + 3 manual scripts + README + daemon barrel expansion); 25 locally-runnable tests across 3 files all green; pre-existing 155 daemon tests still pass; typecheck clean. Tasks 2-5 HALT at gate="blocking-human" checkpoints — each requires real infrastructure (Supabase project + Cloudflare account + Apple Dev cert from 01-03 + Claude Code on dev machine). Plan 01-10 status: harness shipped, live verification gated on user external action.
+- [Phase 01]: 01-10 — daemon/src/index.ts barrel expanded with writeFennecHooks + removeFennecHooks + ALL_HOOK_NAMES exports (originally internal to Plan 01-07). Rationale: synapse-coexistence local test imports via public API; third-party tools coexisting with fennec also need these symbols as Phase 1 closes.
+- [Phase 01]: 01-10 — Two-tier verification pattern adopted: tests/e2e/*.test.ts (Vitest, LOCAL invariants, no infra) + tests/e2e/01-phase-1-smoke.spec.ts (Playwright, LIVE pipeline, real infra). `./tests` added to vitest.workspace.ts; tests/vitest.config.ts excludes *.spec.ts so Vitest/Playwright don't collide.
 
 ### Pending Todos
 
@@ -135,6 +138,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T08:20:40.725Z
-Stopped at: Plan 01-07 complete: Claude Code hook adapter — Go shim + loopback bridge + payload normaliser + managed-settings install/uninstall. 4 tasks, 6 commits owned, 136/136 daemon tests pass, 4/4 Go tests pass.
-Resume file: None
+Last session: 2026-05-31T14:10:00.000Z
+Stopped at: Plan 01-10 PARTIAL — Task 1 autonomous (smoke harness + 25 locally-runnable tests green) committed at e0ec61c; Tasks 2-5 HALT at gate="blocking-human" checkpoints awaiting (a) Supabase project + SUPABASE_ACCESS_TOKEN, (b) Cloudflare account + Hyperdrive + OAuth, (c) Plan 01-03 Apple Dev cert procurement, (d) signed .pkg rebuilt + installed, (e) live Claude Code exercise.
+Resume file: .planning/phases/01-foundations/01-10-SUMMARY.md
