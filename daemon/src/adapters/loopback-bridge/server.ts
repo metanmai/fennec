@@ -1,7 +1,7 @@
 /**
  * Loopback bridge server (Plan 01-07 Task 3).
  *
- * Binds to `127.0.0.1` ONLY (never `0.0.0.0`). Accepts:
+ * Binds to `127.0.0.1` ONLY (never the wildcard interface). Accepts:
  *   - POST /v1/hook — authenticated via `X-Fennec-Shim-Secret`; parses
  *     the JSON body and emits a "hook" event with the parsed payload.
  *     The Claude Code adapter subscribes to this and normalises into
@@ -59,7 +59,7 @@ export class LoopbackBridge extends EventEmitter {
   /**
    * Start listening on the supplied port. Pass `0` to let the kernel
    * pick an ephemeral port (handy for tests). The server is bound to
-   * `127.0.0.1` explicitly — NEVER `0.0.0.0` — so external network
+   * `127.0.0.1` explicitly — NEVER the wildcard interface — so external network
    * traffic can't reach this bridge regardless of host firewall.
    */
   async start(port: number): Promise<void> {
