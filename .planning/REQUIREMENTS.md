@@ -5,14 +5,14 @@
 
 ## v1 Requirements
 
-Requirements for initial release. Each maps to one roadmap phase. Grounded in research synthesis at `.planning/research/SUMMARY.md`.
+Requirements for initial release. Each maps to one roadmap phase. Grounded in research synthesis at `.planning/research/SUMMARY.md` and refined by Phase 1's discussion (see `.planning/phases/01-foundations/01-CONTEXT.md` decisions D-27 through D-31).
 
 ### Capture (CAP)
 
 The local daemon and adapters that capture AI usage at the source.
 
 - [ ] **CAP-01**: Local capture daemon runs as a single background process per user-machine, hosting all in-process adapters
-- [ ] **CAP-02**: Daemon captures Claude Code AI requests via hook entries (SessionStart, UserPromptSubmit, PostToolUse, PreCompact, SessionEnd, SubagentStop) written into `~/.claude/settings.json` by the installer
+- [ ] **CAP-02**: Daemon captures Claude Code AI requests via hook entries (SessionStart, UserPromptSubmit, PostToolUse, PreCompact, SessionEnd, SubagentStop) written into Claude Code's **managed-settings layer** (system-protected path; not user-settings) by the installer
 - [ ] **CAP-03**: Daemon captures Codex CLI sessions via transcript file watcher (synapse-style adapter)
 - [ ] **CAP-04**: Daemon captures Gemini CLI sessions via transcript file watcher
 - [ ] **CAP-05**: Daemon captures Cursor IDE AI usage by watching Cursor's local SQLite/workspaceStorage
@@ -27,8 +27,9 @@ The local daemon and adapters that capture AI usage at the source.
 - [ ] **CAP-14**: Every adapter emits a periodic heartbeat including `events_parsed` and `parse_errors`, even when zero events captured, so dashboards can tell "no AI usage" apart from "adapter broken"
 - [ ] **CAP-15**: Adapters detect schema-hash drift in source-tool data and surface an "adapter offline" status when the upstream format changes
 - [ ] **CAP-16**: Daemon survives offline / network blips with no event loss (events stay in local queue until sync succeeds)
-- [ ] **CAP-17**: `fennec pause` halts capture for transparency / private-mode use; `fennec resume` re-enables
-- [ ] **CAP-18**: `fennec inspect` shows the user what data was captured locally and where it's being sent
+- [ ] **CAP-18**: `fennec inspect` shows the user what data was captured locally and where it's being sent (transparency surface; preserved under tamper-resistance posture)
+
+> **Removed:** CAP-17 (`fennec pause`). Phase 1's discussion (D-16) made fennec an uncircumventable observability agent — no user-controlled pause exists. See `01-CONTEXT.md` for the surveillance-perception-tradeoff rationale.
 
 ### Privacy & Redaction (PRIV)
 
@@ -57,6 +58,9 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **AUTH-11**: Every project-scoped backend route enforces membership via `projectScopeMiddleware`
 - [ ] **AUTH-12**: Every customer-data table enforces RLS as a defense-in-depth backstop (middleware is primary, RLS is belt-and-suspenders)
 - [ ] **AUTH-13**: Same user on multiple machines reports under one identity; cross-machine identity merge UI exists for the rare wrong-link edge case
+- [ ] **AUTH-14**: Backend exposes `POST /api/daemons/enroll` accepting `{ install_secret, machine_id, hostname }` and returning a per-machine API key (org-tier install secret comes from the MDM payload; personal-tier install secret is self-issued by the first-run wizard)
+- [ ] **AUTH-15**: Per-machine API key is stored in a system-protected disk location (root-only readable: `/var/db/fennec/key` macOS, `/var/lib/fennec/key` Linux, `%ProgramData%\fennec\key` Windows)
+- [ ] **AUTH-16**: Dev-OAuth attach flow — on first un-attached boot, daemon surfaces a system tray notification, auto-opens the default browser to the SSO flow (Google / GitHub / Microsoft), and binds the resolved user identity to the per-machine API key; events captured before attach are tagged `unknown@${hostname}` and backfilled on first successful attach
 
 ### Ingestion (ING)
 
@@ -100,18 +104,27 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 
 ### Daemon Lifecycle (DAE)
 
-- [ ] **DAE-01**: `fennec wizard` runs an interactive installer (sign-in, capture-mechanism choice per surface, service install)
-- [ ] **DAE-02**: `fennec init --api-key <key>` runs the same install non-interactively for CI / scripted setup
+- [ ] **DAE-01**: `fennec wizard` runs an interactive installer (sign-in, capture-mechanism choice per surface, service install) — for personal-tier installs
+- [ ] **DAE-02**: `fennec init --install-secret <secret>` runs the same install non-interactively (used by MDM payload execution for org-tier installs)
 - [ ] **DAE-03**: `fennec status` prints a one-line health check (daemon up? queue depth? last sync? adapters running?)
-- [ ] **DAE-04**: `fennec doctor` runs detailed diagnostics (paths, permissions, last events, recent errors, proxy / CA status)
-- [ ] **DAE-05**: Daemon installs as a macOS LaunchAgent
-- [ ] **DAE-06**: Daemon installs as a Linux systemd user service
-- [ ] **DAE-07**: Daemon installs as a Windows service (node-windows or NSSM)
-- [ ] **DAE-08**: macOS binary is Apple-notarised
-- [ ] **DAE-09**: Windows binary is signed with an EV code-signing cert
+- [ ] **DAE-04**: `fennec doctor` runs detailed diagnostics (paths, permissions, last events, recent errors, proxy / CA status, code-sign verification)
+- [ ] **DAE-05**: Daemon installs as a macOS **LaunchDaemon** (system-level, root-owned plist at `/Library/LaunchDaemons/dev.fennec.daemon.plist`) — not LaunchAgent
+- [ ] **DAE-06**: Daemon installs as a Linux systemd **system unit** (root-owned, `/etc/systemd/system/fennec.service`)
+- [ ] **DAE-07**: Daemon installs as a Windows service (node-windows or NSSM), running under the SYSTEM account
+- [ ] **DAE-08**: macOS binary + `.pkg` are signed with an Apple Developer ID certificate, notarised via `notarytool`, and stapled
+- [ ] **DAE-09**: Windows binary + `.msi` are signed with an EV code-signing certificate (cert procurement + first-signature-for-reputation-warm-up start in Phase 1; actual `.msi` build lands in Phase 5)
 - [ ] **DAE-10**: Daemon respects corporate proxy env vars (`NODE_EXTRA_CA_CERTS`, `HTTPS_PROXY`)
-- [ ] **DAE-11**: Daemon detects an existing synapse install on the same machine and chains hooks rather than overwriting them
-- [ ] **DAE-12**: Daemon is distributed via `npm install -g fennec`
+- [ ] **DAE-11**: Daemon coexists non-interferingly with synapse — fennec hooks live in Claude Code's managed-settings layer (system-protected), synapse hooks live in `~/.claude/settings.json` (user-layer); Claude Code's default additive merge fires both on every event
+- [ ] **DAE-12**: Daemon is distributed via a signed macOS `.pkg` (Apple Developer ID + notarisation + stapling) — replaces the prior npm-global distribution path
+- [ ] **DAE-13**: Daemon is distributed via a signed Windows `.msi` (EV code-signing cert)
+- [ ] **DAE-14**: Daemon is distributed via signed Linux `.deb` (apt repo) and `.rpm` (yum repo) packages
+- [ ] **DAE-15**: Daemon is distributed via a Homebrew tap (`brew install fennec`) for macOS and Linuxbrew
+- [ ] **DAE-16**: Daemon is distributed via a curl-bash installer script (`curl -fsSL fennec.dev/install.sh | sudo bash`) for unattended installs and headless CI
+- [ ] **DAE-17**: Daemon writes Claude Code hook entries to managed-settings layer at install time (`/Library/Application Support/ClaudeCode/managed-settings.json` macOS, `/etc/claude-code/managed-settings.json` Linux, `%ProgramData%\ClaudeCode\managed-settings.json` Windows), root/SYSTEM-owned, user-read-only
+- [ ] **DAE-18**: Hook handler is a compiled shim binary at `/usr/local/fennec/bin/fennec-hook` (Windows: `C:\Program Files\fennec\bin\fennec-hook.exe`) that IPCs to the running daemon via loopback bridge (HTTP or Unix socket) with ≤15ms overhead per hook fire; fails open if daemon is unreachable (Claude Code never blocked)
+- [ ] **DAE-19**: `fennec uninstall` removes only fennec's entries from managed-settings (surgical, leaves synapse user-settings untouched), requires the org-token in org-tier installs or sudo in personal-tier, and emits an audit event visible to the org admin
+- [ ] **DAE-20**: Daemon surfaces a system tray notification when no developer identity is attached after enrollment; the notification persists across reboots until SSO attach completes (see AUTH-16)
+- [ ] **DAE-21**: MDM packaging primitives in Phase 1 — the signed `.pkg` accepts an org install secret via a documented config-key schema; polished Jamf Configuration Profile, Intune ADMX, and Workspace ONE manifest templates land in Phase 5
 
 ### Distribution (DIST)
 
@@ -193,16 +206,18 @@ Explicitly excluded from v1 and v2. Documented to prevent scope creep.
 |---------|--------|
 | App-side LLM observability (wrap-your-own-code SDK) | Helicone / Langfuse / LangSmith own this slice; fennec is for vendor-tool capture, not wrap-your-own-code observability |
 | MCP tool surface for AI assistants to consume insights | Synapse owns the "context layer for AI" surface; fennec's product is a human-facing dashboard, not an AI memory layer |
-| Surveillance / employee-monitoring positioning | Adoption-killer; product is observability-for-cost, not behaviour-tracking |
+| User-controlled pause / disable of the capture daemon | Phase 1 D-16: tamper-resistance is core to the product value (org-property observability). Transparency is delivered via `fennec inspect` (CAP-18), not via pause |
+| Surveillance / employee-monitoring positioning | Adoption-killer; product is observability-for-cost, not behaviour-tracking. (NOTE: Phase 1's D-03 knowingly weakens this stance; revisit at milestone close.) |
 | Screen-recording or keystroke-level capture | Privacy-hostile; out of scope on principle |
 | Per-developer performance-review export | Active misuse risk (PITFALLS Pitfall 6) — UI actively makes this hard, not easy |
 | Real-time block-the-AI-call at the network layer | Governance / firewall product, not observability — overlaps with corporate AI gateways |
 | Multi-region cloud / data residency selectors at v1 | Belongs in the enterprise tier; v1 cloud is one region |
 | Mobile-side AI app capture (e.g., Claude iOS) | Out of scope until clear customer pull; iOS sandboxing makes daemon capture infeasible |
+| npm-global as a user-facing install path | Replaced by signed installers — see DAE-12 through DAE-16. Phase 1 D-04 reframed fennec as a signed system agent, not a Node-flavoured CLI tool. (Contributor / dev mode via npm scripts is still supported for working on fennec itself; not for end-users.) |
 
 ## Traceability
 
-Mapped by roadmapper on 2026-05-31. Every v1 REQ-ID maps to exactly one phase.
+Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through D-31. Every v1 REQ-ID maps to exactly one phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
@@ -222,7 +237,6 @@ Mapped by roadmapper on 2026-05-31. Every v1 REQ-ID maps to exactly one phase.
 | CAP-14 | Phase 1 | Pending |
 | CAP-15 | Phase 1 | Pending |
 | CAP-16 | Phase 1 | Pending |
-| CAP-17 | Phase 2 | Pending |
 | CAP-18 | Phase 2 | Pending |
 | PRIV-01 | Phase 1 | Pending |
 | PRIV-02 | Phase 3 | Pending |
@@ -244,6 +258,9 @@ Mapped by roadmapper on 2026-05-31. Every v1 REQ-ID maps to exactly one phase.
 | AUTH-11 | Phase 3 | Pending |
 | AUTH-12 | Phase 3 | Pending |
 | AUTH-13 | Phase 3 | Pending |
+| AUTH-14 | Phase 1 | Pending |
+| AUTH-15 | Phase 1 | Pending |
+| AUTH-16 | Phase 1 | Pending |
 | ING-01 | Phase 1 | Pending |
 | ING-02 | Phase 1 | Pending |
 | ING-03 | Phase 1 | Pending |
@@ -282,11 +299,20 @@ Mapped by roadmapper on 2026-05-31. Every v1 REQ-ID maps to exactly one phase.
 | DAE-05 | Phase 1 | Pending |
 | DAE-06 | Phase 5 | Pending |
 | DAE-07 | Phase 5 | Pending |
-| DAE-08 | Phase 5 | Pending |
-| DAE-09 | Phase 5 | Pending |
+| DAE-08 | Phase 1 | Pending |
+| DAE-09 | Phase 1 | Pending |
 | DAE-10 | Phase 1 | Pending |
 | DAE-11 | Phase 1 | Pending |
 | DAE-12 | Phase 1 | Pending |
+| DAE-13 | Phase 5 | Pending |
+| DAE-14 | Phase 5 | Pending |
+| DAE-15 | Phase 5 | Pending |
+| DAE-16 | Phase 5 | Pending |
+| DAE-17 | Phase 1 | Pending |
+| DAE-18 | Phase 1 | Pending |
+| DAE-19 | Phase 1 | Pending |
+| DAE-20 | Phase 1 | Pending |
+| DAE-21 | Phase 1 | Pending |
 | DIST-01 | Phase 6 | Pending |
 | DIST-02 | Phase 6 | Pending |
 | DIST-03 | Phase 6 | Pending |
@@ -301,20 +327,23 @@ Mapped by roadmapper on 2026-05-31. Every v1 REQ-ID maps to exactly one phase.
 | DIST-12 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 93
-- Mapped to phases: 93 (100%)
+- v1 requirements: 104
+- Mapped to phases: 104 (100%)
 - Unmapped: 0
+- Removed since first draft: CAP-17 (`fennec pause` — D-16 / D-27)
+- Added since first draft: AUTH-14, AUTH-15, AUTH-16, DAE-13, DAE-14, DAE-15, DAE-16, DAE-17, DAE-18, DAE-19, DAE-20, DAE-21 (+12 new — D-30)
+- Moved since first draft: DAE-08 (Phase 5 → Phase 1), DAE-09 (Phase 5 → Phase 1) (D-29)
 
 **Per-phase counts:**
-- Phase 1 (Foundations): 26 requirements (CAP-01, CAP-02, CAP-10..16, PRIV-01, PRIV-07, AUTH-09, AUTH-10, ING-01..06, ANL-06, DAE-01, DAE-02, DAE-05, DAE-10, DAE-11, DAE-12)
-- Phase 2 (Parallel Adapters + Backend Analysis): 17 requirements (CAP-03..09, CAP-17, CAP-18, ANL-01..05, ANL-07, ANL-08, ANL-09)
-- Phase 3 (Multi-Tenant Backend Maturity): 16 requirements (AUTH-01..08, AUTH-11..13, PRIV-02..06)
-- Phase 4 (Dashboards): 16 requirements (DASH-01..15, DAE-03)
-- Phase 5 (Cross-Platform Daemon Polish): 5 requirements (DAE-04, DAE-06..09)
-- Phase 6 (Self-Host Distribution + License + Public Repo): 13 requirements (ING-07, DIST-01..12)
+- Phase 1 (Foundations): **36** — CAP-01, CAP-02, CAP-10..16, PRIV-01, PRIV-07, AUTH-09, AUTH-10, AUTH-14, AUTH-15, AUTH-16, ING-01..06, ANL-06, DAE-01, DAE-02, DAE-05, DAE-08, DAE-09, DAE-10, DAE-11, DAE-12, DAE-17, DAE-18, DAE-19, DAE-20, DAE-21
+- Phase 2 (Parallel Adapters + Backend Analysis): **16** — CAP-03..09, CAP-18, ANL-01..05, ANL-07, ANL-08, ANL-09
+- Phase 3 (Multi-Tenant Backend Maturity): **16** — AUTH-01..08, AUTH-11..13, PRIV-02..06
+- Phase 4 (Dashboards): **16** — DASH-01..15, DAE-03
+- Phase 5 (Cross-Platform Daemon Polish): **7** — DAE-04, DAE-06, DAE-07, DAE-13, DAE-14, DAE-15, DAE-16
+- Phase 6 (Self-Host Distribution + License + Public Repo): **13** — ING-07, DIST-01..12
 
-Sum: 26 + 17 + 16 + 16 + 5 + 13 = 93 ✓
+Sum: 36 + 16 + 16 + 16 + 7 + 13 = **104 ✓**
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 — traceability populated by roadmapper*
+*Last updated: 2026-05-31 — applied Phase 1 discussion decisions D-27 through D-31*

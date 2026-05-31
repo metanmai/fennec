@@ -22,27 +22,29 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Foundations
-**Goal**: A prompt typed in Claude Code on macOS arrives in Supabase via the daemon, with capture-time secret redaction applied, dedupes on retry, survives daemon restart, and emits adapter heartbeats so the dashboard could tell "no AI usage" from "adapter broken."
+**Goal**: A prompt typed in Claude Code on macOS arrives in Supabase via the daemon — distributed as a **signed Apple-notarised `.pkg`**, installed as a macOS **LaunchDaemon** (system-level), enrolled via org install secret, attached to a developer identity via SSO, with hooks installed in Claude Code's **managed-settings layer** (tamper-resistant by file ACL), capture-time secret redaction applied, dedupe on retry, daemon-restart survival, and adapter heartbeats so the dashboard could tell "no AI usage" from "adapter broken."
 **Depends on**: Nothing (first phase)
-**Requirements**: CAP-01, CAP-02, CAP-10, CAP-11, CAP-12, CAP-13, CAP-14, CAP-15, CAP-16, PRIV-01, PRIV-07, AUTH-09, AUTH-10, ING-01, ING-02, ING-03, ING-04, ING-05, ING-06, ANL-06, DAE-01, DAE-02, DAE-05, DAE-10, DAE-11, DAE-12
+**Requirements**: CAP-01, CAP-02, CAP-10, CAP-11, CAP-12, CAP-13, CAP-14, CAP-15, CAP-16, PRIV-01, PRIV-07, AUTH-09, AUTH-10, AUTH-14, AUTH-15, AUTH-16, ING-01, ING-02, ING-03, ING-04, ING-05, ING-06, ANL-06, DAE-01, DAE-02, DAE-05, DAE-08, DAE-09, DAE-10, DAE-11, DAE-12, DAE-17, DAE-18, DAE-19, DAE-20, DAE-21 (36 total)
 **Success Criteria** (what must be TRUE):
-  1. A prompt typed in Claude Code on macOS produces a row in `ai_events` in Supabase within 5 minutes, via the daemon and its sync loop.
-  2. Pasting any of 10 canary secrets (AWS key, GitHub PAT, Bearer token, private key, generic high-entropy string, etc.) into a Claude Code prompt results in zero secret characters reaching the cloud `ai_events` row; the daemon's redactor stamps a `redaction_applied_at` timestamp and version hash on the event.
-  3. Killing the daemon mid-flight (`kill -9`) and restarting it loses zero captured events; replaying the same batch is idempotent on the backend (`ON CONFLICT (idempotency_key) DO NOTHING`).
-  4. The first-run installer (`fennec wizard` and `fennec init --api-key <k>`) writes Claude Code hook entries into `~/.claude/settings.json` chaining (not overwriting) any existing synapse entries, installs a macOS LaunchAgent, and surfaces a consent screen showing exactly what's captured before any hook fires.
-  5. Every adapter emits an `AdapterHeartbeat` event at a fixed cadence including `events_parsed`, `parse_errors`, and a `schema_hash` of the upstream tool's data shape — even when zero events were captured in the interval.
+  1. A prompt typed in Claude Code on macOS produces a row in `ai_events` in Supabase within 5 minutes, via the daemon and its sync loop, tagged with the per-machine API key's `org_id` and (after SSO attach) the developer's `user_id`.
+  2. The macOS daemon is distributed as an **Apple-notarised signed `.pkg`** — installing it from a fresh download succeeds without the Gatekeeper "unidentified developer" dialog; `spctl --assess --type install fennec.pkg` returns "source=Notarized Developer ID"; the Windows EV code-signing certificate has been procured and the reputation-warm-up clock has started (proof: a signed test artefact + signtool verification).
+  3. The daemon installs Claude Code hook entries into the system **managed-settings layer** (`/Library/Application Support/ClaudeCode/managed-settings.json`, root-owned, user-readable but not user-writable); `~/.claude/settings.json` is untouched; if synapse hooks exist in user-settings, both fire on every Claude Code event (additive merge); the hook handler is a compiled shim binary that IPCs to the daemon with ≤15ms overhead and fails open if the daemon is unreachable.
+  4. The first-run flow works end-to-end: an `fennec init --install-secret <secret>` (simulating an MDM payload) enrolls the daemon against the backend (`POST /api/daemons/enroll`), receives a per-machine API key stored at `/var/db/fennec/key` (root-only readable, mode 0400); the daemon surfaces a tray notification on first boot; clicking the notification opens the default browser to an SSO flow (Google / GitHub / Microsoft); the resolved `user_id` backfills `unknown@${hostname}` events captured before attach.
+  5. Pasting any of 10 canary secrets (AWS key, GitHub PAT, Bearer token, private key, generic high-entropy string, etc.) into a Claude Code prompt results in zero secret characters reaching the cloud `ai_events` row; the daemon's redactor stamps a `redaction_applied_at` timestamp and version hash on the event; the first-run consent screen has been shown to the operator before any hook fired.
+  6. Killing the daemon mid-flight (`kill -9`) and restarting it loses zero captured events; replaying the same batch is idempotent on the backend (`ON CONFLICT (idempotency_key) DO NOTHING`); every adapter emits an `AdapterHeartbeat` at a fixed cadence including `events_parsed`, `parse_errors`, and a `schema_hash` of the upstream tool's data shape — even when zero events were captured in the interval.
+  7. `fennec uninstall` (requires sudo + the org token or personal-tier admin) removes only fennec's entries from managed-settings, leaves `~/.claude/settings.json` and any synapse entries untouched, emits an audit event the backend records as visible to the org admin, and cleanly stops/removes the LaunchDaemon.
 **Plans**: TBD
 
 ### Phase 2: Parallel Adapters + Backend Analysis Layer
 **Goal**: All four capture surfaces (CLI hooks, CLI transcripts, IDE, browser) capturing in staging plus git events; backend correlation, model-fit, and daily-aggregator workers populating the dashboard-read tables.
 **Depends on**: Phase 1
-**Requirements**: CAP-03, CAP-04, CAP-05, CAP-06, CAP-07, CAP-08, CAP-09, CAP-17, CAP-18, ANL-01, ANL-02, ANL-03, ANL-04, ANL-05, ANL-07, ANL-08, ANL-09
+**Requirements**: CAP-03, CAP-04, CAP-05, CAP-06, CAP-07, CAP-08, CAP-09, CAP-18, ANL-01, ANL-02, ANL-03, ANL-04, ANL-05, ANL-07, ANL-08, ANL-09 (16 total — CAP-17 removed per Phase 1 D-27)
 **Success Criteria** (what must be TRUE):
   1. On a single macOS dev machine, one prompt in Codex CLI, one in Gemini CLI, one in Cursor, one in Copilot (via the paired VS Code sidecar), one in ChatGPT.com (via the MV3 extension's loopback bridge), and one in Claude.ai (same path) each produce one canonical `ai_events` row tagged with the correct `tool` value within 5 minutes — or the browser surface is explicitly flagged as "submit-and-wait" / "defer" at the v1-freeze decision point with the architecture unchanged.
   2. Commits, reverts, file edits, and branch switches in a watched git repo produce `git_events` rows; the correlation worker joins prompts to nearby git events within a ±N-minute window and writes `prompt_outcomes` rows whose attribution carries a confidence interval (not a bare percentage), with reverts explicitly downgrading attribution rather than silently subtracting from totals.
   3. The model-fit worker scores every captured prompt against the model used and writes a `model_fit_scores` row using rule-based heuristics (length, file-edit size, tool-call count, model tier).
   4. The daily aggregator cron writes `daily_rollups_by_user` and `daily_rollups_by_project` rows; cost is reported with separate "estimated" and "billed" columns, with cache-creation/cache-read tokens accounted separately and subscription products (Copilot, ChatGPT Pro) counted apart from per-token spend; pricing is read from a `model_pricing` table with effective-date ranges, not hardcoded.
-  5. `fennec pause` halts capture and `fennec resume` re-enables it; `fennec inspect` shows the developer every event captured locally in the last 24 hours with redactions visible.
+  5. `fennec inspect` shows the developer every event captured locally in the last 24 hours with redactions visible (transparency surface — CAP-17 `pause` is removed per Phase 1 D-16).
 **Plans**: TBD
 
 ### Phase 3: Multi-Tenant Backend Maturity
@@ -71,14 +73,14 @@ Decimal phases appear between their surrounding integers in numeric order.
 **UI hint**: yes
 
 ### Phase 5: Cross-Platform Daemon Polish
-**Goal**: The daemon installs and runs cleanly on Linux (systemd user service) and Windows (Windows service via node-windows or NSSM), the macOS binary is Apple-notarised, the Windows binary is EV-signed, and `fennec doctor` diagnoses corporate-proxy / CA / quarantine / permission issues on all three platforms.
+**Goal**: The daemon installs and runs cleanly on Linux (systemd system service) and Windows (Windows service via node-windows or NSSM); signed Linux `.deb` / `.rpm` packages ship through apt/yum repos; signed Windows `.msi` ships using the EV cert procured + warm-up'd in Phase 1; Homebrew tap and curl-bash installer round out the distribution surface; `fennec doctor` diagnoses corporate-proxy / CA / quarantine / permission issues on all three platforms.
 **Depends on**: Phase 4
-**Requirements**: DAE-04, DAE-06, DAE-07, DAE-08, DAE-09
+**Requirements**: DAE-04, DAE-06, DAE-07, DAE-13, DAE-14, DAE-15, DAE-16 (7 total — DAE-08, DAE-09 moved to Phase 1 per D-29; DAE-13/14/15/16 are new per D-30)
 **Success Criteria** (what must be TRUE):
-  1. On a fresh Ubuntu LTS box, `fennec wizard` installs a systemd user service that starts on login, survives reboot, and reports a heartbeat to the backend within 1 minute.
-  2. On a fresh Windows 11 VM with default Microsoft Defender settings, the EV-signed `fennec.exe` installs as a Windows service (via node-windows or NSSM) without quarantine and without the SmartScreen "unidentified developer" block, starts on boot, and reports a heartbeat to the backend within 1 minute.
-  3. On macOS, the Apple-notarised binary installs without the Gatekeeper "unidentified developer" dialog on a clean machine, and the LaunchAgent survives reboot.
-  4. `fennec doctor` prints actionable diagnostics across all three platforms covering paths, permissions, last events, recent errors, proxy reachability, `NODE_EXTRA_CA_CERTS` / `HTTPS_PROXY` status, and (on Windows) Defender quarantine detection with a fix step.
+  1. On a fresh Ubuntu LTS box, `apt install fennec` (from a signed apt repo) or the curl-bash installer installs a systemd system service that starts on boot, survives reboot, and reports a heartbeat to the backend within 1 minute.
+  2. On a fresh Windows 11 VM with default Microsoft Defender settings, the EV-signed `fennec.msi` (using the cert procured in Phase 1 with its reputation warm-up completed) installs as a Windows service (via node-windows or NSSM) without quarantine and without the SmartScreen "unidentified developer" block, starts on boot, and reports a heartbeat to the backend within 1 minute.
+  3. The Homebrew tap (`brew install fennec`) and curl-bash installer (`curl -fsSL fennec.dev/install.sh | sudo bash`) both produce a working install on macOS and Linux; macOS continues to use the Phase 1 Apple-notarised `.pkg`.
+  4. `fennec doctor` prints actionable diagnostics across all three platforms covering paths, permissions, last events, recent errors, proxy reachability, `NODE_EXTRA_CA_CERTS` / `HTTPS_PROXY` status, code-sign verification, and (on Windows) Defender quarantine detection with a fix step.
 **Plans**: TBD
 
 ### Phase 6: Self-Host Distribution + License + Public Repo
