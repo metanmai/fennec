@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Cloudflare Workers
+.wrangler/
+
+# Test output / coverage
+coverage/
+playwright-report/
+test-results/
+
+# Environment files (real secrets never committed)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Installer artefacts
+*.pkg
+*.msi
+*.deb
+*.rpm
+
+# Manual test scratchpad
+tests/manual/output/
+
+# Claude Code agent scratchpad
+.claude/output/
+
+# Local fennec runtime (would never live here, but exclude defensively)
+~/.fennec/

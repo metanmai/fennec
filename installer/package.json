@@ -1,0 +1,7 @@
+{
+  "name": "@fennec/installer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Signed-installer build pipeline (macOS .pkg + Apple notarisation, Windows EV .msi, Linux .deb/.rpm, Homebrew tap, curl-bash). Phase 1 ships the macOS pipeline; Win/Linux land in plan 01-09."
+}

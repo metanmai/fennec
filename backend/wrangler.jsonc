@@ -1,0 +1,8 @@
+{
+  // Skeleton wrangler config — Hyperdrive, Queues, Analytics Engine bindings
+  // and the production `routes` array arrive with plan 01-05.
+  "name": "fennec-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-31",
+  "compatibility_flags": ["nodejs_compat"]
+}

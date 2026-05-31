@@ -1,0 +1,38 @@
+{
+  "name": "fennec",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AI usage and cost observability platform — local daemon captures AI requests, correlates with git activity, surfaces per-developer and per-project visibility.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "daemon",
+    "backend",
+    "packages/*",
+    "installer"
+  ],
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --build",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean && rm -rf */dist packages/*/dist",
+    "test": "vitest run",
+    "test:unit": "vitest run --reporter=dot",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@playwright/test": "1.49.1",
+    "@types/node": "22.10.5",
+    "husky": "9.1.7",
+    "lint-staged": "16.1.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.7"
+  }
+}

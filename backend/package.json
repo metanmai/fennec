@@ -1,0 +1,17 @@
+{
+  "name": "@fennec/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build",
+    "test": "vitest run",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@fennec/shared": "*"
+  },
+  "devDependencies": {
+    "wrangler": "4.93.1"
+  }
+}
