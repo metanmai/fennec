@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Completed Plan 01-04 (Supabase schema migrations: 7 migrations, 10/10 RLS, partitioned ai_events + git_events, Phase 1 seed)"
-last_updated: "2026-05-31T06:04:40.045Z"
+stopped_at: "Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED."
+last_updated: "2026-05-31T06:18:14.973Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 10
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ Plan: 4 of 10 in current phase
 Status: Ready to execute
 Last activity: 2026-05-31
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [███░░░░░░░] 30%
 | Phase 1 P1 | 11 | 4 tasks | 21 files |
 | Phase 01 P02 | 33 min | 2 tasks | 12 files |
 | Phase 01 P04 | ~4 min | 2 tasks | 10 files |
+| Phase 01 P03 | 7m | 1 of 3 (Task 3 done; Tasks 1+2 procurement-gated) tasks | 7 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,10 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-04: RLS ENABLE + tenant-isolation CREATE POLICY on all 10 customer-data tables from day 1 (D-26/PITFALL P5); users uses USING(TRUE) placeholder until Phase 3 adds org_members JOIN; orgs uses id=jwt.org_id since orgs.id IS the tenant
 - [Phase 01]: 01-04: hashes computed in SQL via pgcrypto.digest() in the seed migration (single source of truth = plaintext); ai_events/git_events range-partitioned by occurred_at with current+next month for ai_events and current month only for git_events
 - [Phase 01]: 01-04: api_keys partial UNIQUE index on token_hash WHERE revoked_at IS NULL keeps bearer-auth lookup fast as revocation history grows; daemon_audit_events.daemon_machine_id NULLABLE (no CASCADE) so post-uninstall audits survive
+- [Phase 01]: 01-03 — partial completion: autonomous playbooks + smoke scripts + 01-CERT-STATUS.md shipped (commits 02ebe69 + b5e7cef); Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program ~99 USD/yr + Win EV cert ~280-700 USD/yr)
+- [Phase 01]: 01-03 — Phase 1 Win EV acceptance recalibrated per Pitfall 4 (Microsoft SmartScreen March 2024 policy change): success criterion is cert procured + first signature + signtool verify, NOT full reputation. Full reputation is a Phase 5 emergent outcome after .msi distribution accumulates downloads.
+- [Phase 01]: 01-03 — vendor recommendation: DigiCert (fastest + KeyLocker cloud signing avoids HSM shipping), Sectigo (best price-to-delivery for indie devs), Certera (cheapest CA/B Forum option). Cloud signing preferred over USB HSM where budget permits.
+- [Phase 01]: 01-03 — Pitfall 11 (notarytool --wait) hardcoded in installer/macos/sign-test-artefact.sh; App Store Connect .p8 lives at ~/.config/fennec-keys/ chmod 400 OUTSIDE the repo (T-03-03); .gitignore already excludes *.p8
 
 ### Pending Todos
 
@@ -87,11 +92,12 @@ None yet.
 
 ### Blockers/Concerns
 
-None yet. Three research-phase candidates flagged in roadmap derivation:
+None yet on the daemon/backend track. Three research-phase candidates flagged in roadmap derivation:
 
 - Phase 2: Cursor SQLite multi-DB stability, Copilot cache-file location, Manifest V3 fetch-monkeypatch viability against late-2026 ChatGPT — recommend `/gsd:plan-phase --research-phase 2`.
 - Phase 5: Windows daemon lifecycle (Defender + EV-cert reputation timing, Task Scheduler, PowerShell), Cursor/Gemini transcript paths on Windows — recommend `/gsd:plan-phase --research-phase 5`.
 - Phase 6: workerd vs Hono-on-Node final pick for self-host (depends on Queues abstraction complexity).
+- Plan 01-03 Tasks 1+2 procurement-gated: Apple Developer Program enrollment (~99/yr; instant to 24h) + Windows EV cert procurement (~280-700/yr from DigiCert/Sectigo/Certera; 2-7 days for ID-verification + HSM/cloud-signing). User must (a) enrol at developer.apple.com/programs/enroll and complete steps in installer/macos/CERT-PROCUREMENT.md to fill 01-CERT-STATUS.md macOS section; (b) purchase EV cert from chosen vendor and complete steps in installer/windows/CERT-PROCUREMENT.md to fill 01-CERT-STATUS.md Windows section. Wave 3+ plans (01-05, 01-06) are NOT blocked by this — only Plan 01-09 signed installer pipeline in Wave 5 requires the credentials.
 
 ## Deferred Items
 
@@ -103,6 +109,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T06:04:40.039Z
-Stopped at: Completed Plan 01-04 (Supabase schema migrations: 7 migrations, 10/10 RLS, partitioned ai_events + git_events, Phase 1 seed)
-Resume file: None
+Last session: 2026-05-31T06:18:14.967Z
+Stopped at: Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED.
+Resume file: installer/macos/CERT-PROCUREMENT.md + installer/windows/CERT-PROCUREMENT.md
