@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: "Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED."
-last_updated: "2026-05-31T06:56:58.959Z"
+last_updated: "2026-05-31T07:35:59.201Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 10
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 1 of 6 (Foundations)
-Plan: 5 of 10 in current phase
+Plan: 6 of 10 in current phase
 Status: Ready to execute
 Last activity: 2026-05-31
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [█████░░░░░] 50%
 | Phase 01 P04 | ~4 min | 2 tasks | 10 files |
 | Phase 01 P03 | 7m | 1 of 3 (Task 3 done; Tasks 1+2 procurement-gated) tasks | 7 files |
 | Phase 01 P05 | ~25 min | 3 tasks | 29 files |
+| Phase 01-foundations P06 | 22 min | - tasks | - files |
 
 ## Accumulated Context
 
@@ -92,6 +93,12 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 01]: 01-05 — org_id ALWAYS from auth context (c.get), NEVER from request body (T-05-02); unit test asserts hostile events[i].org_id is ignored
 - [Phase ?]: [Phase 01]: 01-05 — hot-path purity enforced by static-grep test on events-batch.ts source (no correlation/model-fit/aggregator imports — ING-04)
 - [Phase ?]: [Phase 01]: 01-05 — attach-callback resolves daemon_machine by machine_id alone; PKCE + state-KV TTL gate the path; residual attacker-binds-victim-to-attacker-org annoyance documented and accepted
+- [Phase ?]: A2 cache-token semantics resolved: option (c) — daemon captures all 4 Anthropic Usage fields verbatim; Phase 2 cost worker calibrates against billed-usage data
+- [Phase ?]: Tree-walk redaction (not stringify-redact-parse) — walks payload structure so gitleaks rules anchored on real chars fire correctly; fixes JSON-escape blind spot
+- [Phase ?]: 4 fennec-supplemental gitleaks rules layered on vendored upstream v8.21.0 — required to cover all 10 PRIV-01 canaries
+- [Phase ?]: W-4 SHA-256 pin enforced at two layers (build script + canary test) for vendored gitleaks-rules.toml
+- [Phase ?]: schema_hash via field-name set hash (Open Question 3 option a) for CAP-15 drift detection
+- [Phase ?]: Bearer-token log sanitiser strips Bearer tokens from any Error message before forwarding to logError (threat T-06-06)
 
 ### Pending Todos
 
@@ -116,6 +123,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T06:56:45.238Z
+Last session: 2026-05-31T07:35:59.195Z
 Stopped at: Plan 01-03 partial: autonomous deliverables (playbooks + scripts + 01-CERT-STATUS.md) shipped in commits 02ebe69 + b5e7cef. Tasks 1+2 procurement-gated awaiting user external action (Apple Dev Program + Win EV cert). Returning CHECKPOINT REACHED.
 Resume file: None

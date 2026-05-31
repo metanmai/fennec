@@ -11,7 +11,7 @@ Requirements for initial release. Each maps to one roadmap phase. Grounded in re
 
 The local daemon and adapters that capture AI usage at the source.
 
-- [ ] **CAP-01**: Local capture daemon runs as a single background process per user-machine, hosting all in-process adapters
+- [x] **CAP-01**: Local capture daemon runs as a single background process per user-machine, hosting all in-process adapters
 - [ ] **CAP-02**: Daemon captures Claude Code AI requests via hook entries (SessionStart, UserPromptSubmit, PostToolUse, PreCompact, SessionEnd, SubagentStop) written into Claude Code's **managed-settings layer** (system-protected path; not user-settings) by the installer
 - [ ] **CAP-03**: Daemon captures Codex CLI sessions via transcript file watcher (synapse-style adapter)
 - [ ] **CAP-04**: Daemon captures Gemini CLI sessions via transcript file watcher
@@ -21,12 +21,12 @@ The local daemon and adapters that capture AI usage at the source.
 - [ ] **CAP-08**: Browser extension (Manifest V3) captures Claude.ai AI usage and posts events to daemon's loopback bridge
 - [ ] **CAP-09**: Daemon captures local git activity (commits, reverts, file edits, branch switches) via a dedicated git-watcher adapter
 - [x] **CAP-10**: All adapters emit events conforming to a single canonical `CanonicalEvent` schema defined in `packages/shared/`
-- [ ] **CAP-11**: Local queue is append-only and crash-safe (JSONL with explicit rotation; synapse pattern)
-- [ ] **CAP-12**: Sync loop batches events (100 per batch or 5-second flush) and POSTs to backend; watermark advances on 2xx, exponential backoff on 5xx
+- [x] **CAP-11**: Local queue is append-only and crash-safe (JSONL with explicit rotation; synapse pattern)
+- [x] **CAP-12**: Sync loop batches events (100 per batch or 5-second flush) and POSTs to backend; watermark advances on 2xx, exponential backoff on 5xx
 - [x] **CAP-13**: Each event carries a stable `idempotency_key` so the backend can dedupe on retry
-- [ ] **CAP-14**: Every adapter emits a periodic heartbeat including `events_parsed` and `parse_errors`, even when zero events captured, so dashboards can tell "no AI usage" apart from "adapter broken"
-- [ ] **CAP-15**: Adapters detect schema-hash drift in source-tool data and surface an "adapter offline" status when the upstream format changes
-- [ ] **CAP-16**: Daemon survives offline / network blips with no event loss (events stay in local queue until sync succeeds)
+- [x] **CAP-14**: Every adapter emits a periodic heartbeat including `events_parsed` and `parse_errors`, even when zero events captured, so dashboards can tell "no AI usage" apart from "adapter broken"
+- [x] **CAP-15**: Adapters detect schema-hash drift in source-tool data and surface an "adapter offline" status when the upstream format changes
+- [x] **CAP-16**: Daemon survives offline / network blips with no event loss (events stay in local queue until sync succeeds)
 - [ ] **CAP-18**: `fennec inspect` shows the user what data was captured locally and where it's being sent (transparency surface; preserved under tamper-resistance posture)
 
 > **Removed:** CAP-17 (`fennec pause`). Phase 1's discussion (D-16) made fennec an uncircumventable observability agent — no user-controlled pause exists. See `01-CONTEXT.md` for the surveillance-perception-tradeoff rationale.
@@ -35,7 +35,7 @@ The local daemon and adapters that capture AI usage at the source.
 
 Trust-failure prevention. Must ship with capture or it cannot be retrofitted safely.
 
-- [ ] **PRIV-01**: Capture-time secret redaction strips common dev secrets (gitleaks-style default rules: API keys, bearer tokens, private keys, AWS keys, etc.) **before** events leave the user's machine
+- [x] **PRIV-01**: Capture-time secret redaction strips common dev secrets (gitleaks-style default rules: API keys, bearer tokens, private keys, AWS keys, etc.) **before** events leave the user's machine
 - [ ] **PRIV-02**: Org admins can configure custom redaction regexes that the daemon fetches and applies at capture time
 - [ ] **PRIV-03**: Each org has a data retention setting; defaults are 30 days (SaaS) and 90 days (self-host)
 - [ ] **PRIV-04**: Per-org KMS encryption at rest for stored prompts and responses (cloud tier)
@@ -113,7 +113,7 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **DAE-07**: Daemon installs as a Windows service (node-windows or NSSM), running under the SYSTEM account
 - [ ] **DAE-08**: macOS binary + `.pkg` are signed with an Apple Developer ID certificate, notarised via `notarytool`, and stapled
 - [ ] **DAE-09**: Windows binary + `.msi` are signed with an EV code-signing certificate (cert procurement + first-signature-for-reputation-warm-up start in Phase 1; actual `.msi` build lands in Phase 5)
-- [ ] **DAE-10**: Daemon respects corporate proxy env vars (`NODE_EXTRA_CA_CERTS`, `HTTPS_PROXY`)
+- [x] **DAE-10**: Daemon respects corporate proxy env vars (`NODE_EXTRA_CA_CERTS`, `HTTPS_PROXY`)
 - [ ] **DAE-11**: Daemon coexists non-interferingly with synapse — fennec hooks live in Claude Code's managed-settings layer (system-protected), synapse hooks live in `~/.claude/settings.json` (user-layer); Claude Code's default additive merge fires both on every event
 - [ ] **DAE-12**: Daemon is distributed via a signed macOS `.pkg` (Apple Developer ID + notarisation + stapling) — replaces the prior npm-global distribution path
 - [ ] **DAE-13**: Daemon is distributed via a signed Windows `.msi` (EV code-signing cert)
@@ -221,7 +221,7 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CAP-01 | Phase 1 | Pending |
+| CAP-01 | Phase 1 | Complete |
 | CAP-02 | Phase 1 | Pending |
 | CAP-03 | Phase 2 | Pending |
 | CAP-04 | Phase 2 | Pending |
@@ -231,14 +231,14 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | CAP-08 | Phase 2 | Pending |
 | CAP-09 | Phase 2 | Pending |
 | CAP-10 | Phase 1 | Complete |
-| CAP-11 | Phase 1 | Pending |
-| CAP-12 | Phase 1 | Pending |
+| CAP-11 | Phase 1 | Complete |
+| CAP-12 | Phase 1 | Complete |
 | CAP-13 | Phase 1 | Complete |
-| CAP-14 | Phase 1 | Pending |
-| CAP-15 | Phase 1 | Pending |
-| CAP-16 | Phase 1 | Pending |
+| CAP-14 | Phase 1 | Complete |
+| CAP-15 | Phase 1 | Complete |
+| CAP-16 | Phase 1 | Complete |
 | CAP-18 | Phase 2 | Pending |
-| PRIV-01 | Phase 1 | Pending |
+| PRIV-01 | Phase 1 | Complete |
 | PRIV-02 | Phase 3 | Pending |
 | PRIV-03 | Phase 3 | Pending |
 | PRIV-04 | Phase 3 | Pending |
@@ -301,7 +301,7 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | DAE-07 | Phase 5 | Pending |
 | DAE-08 | Phase 1 | Pending |
 | DAE-09 | Phase 1 | Pending |
-| DAE-10 | Phase 1 | Pending |
+| DAE-10 | Phase 1 | Complete |
 | DAE-11 | Phase 1 | Pending |
 | DAE-12 | Phase 1 | Pending |
 | DAE-13 | Phase 5 | Pending |
