@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  fennec MDM Configuration Profile primitive (Plan 01-09 Task 2,
+  DAE-21, per D-08 / D-09).
+
+  ========================================================================
+  PHASE 1 PRIMITIVE — NOT A JAMF / INTUNE READY TEMPLATE
+  ========================================================================
+
+  Per D-09, Phase 1 ships the MDM PRIMITIVES (schema + payload shape +
+  the org_install_secret key the daemon reads on first run). Phase 5
+  ships the polished Jamf Pro JSON / Intune ADMX / Workspace ONE
+  templates for actual IT-team rollout.
+
+  How an IT admin uses this Phase 1 primitive:
+  ------------------------------------------------------------------------
+    1. Copy this file to a working location.
+    2. Replace REPLACE_WITH_ORG_INSTALL_SECRET with the org install
+       secret issued by the fennec backend.
+    3. Replace REPLACE_WITH_ORG_NAME with the org's display name.
+    4. (Optional) Adjust api_url for self-hosted fennec instances.
+    5. Convert to .mobileconfig (`plutil -convert xml1` + repackaging)
+       OR upload directly to the MDM tool of choice as a custom
+       configuration profile.
+    6. Deploy via Jamf / Intune / Workspace ONE / etc. macOS will
+       drop the resulting plist at
+       /Library/Managed Preferences/dev.fennec.daemon.plist on each
+       enrolled device.
+    7. The .pkg postinstall script detects that file and invokes
+       `fennec init --read-config /Library/Managed Preferences/dev.fennec.daemon.plist`
+       which trades the install_secret for a per-machine api_key and
+       brings the daemon online.
+
+  Threat note (T-09-08): the install_secret here is in plaintext. The
+  Phase 1 contract treats the .mobileconfig as IT-admin scoped — the
+  admin protects it the same way they protect the AD GPO or the Jamf
+  config payload. Phase 5 polished templates encrypt the payload per
+  Jamf / Intune capabilities (FileVault-bound secrets, SCEP/PKI
+  certificates, etc.).
+-->
+<plist version="1.0">
+<dict>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+
+    <key>PayloadIdentifier</key>
+    <string>dev.fennec.config</string>
+
+    <key>PayloadUUID</key>
+    <string>REPLACE_WITH_GENERATED_UUID</string>
+
+    <key>PayloadDisplayName</key>
+    <string>Fennec Org Configuration</string>
+
+    <key>PayloadDescription</key>
+    <string>Configures the fennec daemon with the org install secret for non-interactive enrollment.</string>
+
+    <key>PayloadOrganization</key>
+    <string>REPLACE_WITH_ORG_NAME</string>
+
+    <key>PayloadScope</key>
+    <string>System</string>
+
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadType</key>
+            <string>dev.fennec.daemon</string>
+
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+
+            <key>PayloadIdentifier</key>
+            <string>dev.fennec.daemon.config</string>
+
+            <key>PayloadUUID</key>
+            <string>REPLACE_WITH_INNER_UUID</string>
+
+            <key>PayloadDisplayName</key>
+            <string>Fennec Daemon Settings</string>
+
+            <!-- fennec-specific keys read by the daemon's `fennec init` -->
+            <key>org_install_secret</key>
+            <string>REPLACE_WITH_ORG_INSTALL_SECRET</string>
+
+            <key>org_name</key>
+            <string>REPLACE_WITH_ORG_NAME</string>
+
+            <key>api_url</key>
+            <string>https://api.fennec.dev</string>
+        </dict>
+    </array>
+</dict>
+</plist>

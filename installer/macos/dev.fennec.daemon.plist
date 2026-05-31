@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  fennec LaunchDaemon (Plan 01-09 Task 2, DAE-05, D-19).
+
+  Phase 1 installer artefact. Placed at
+  /Library/LaunchDaemons/dev.fennec.daemon.plist during postinstall
+  with mode 0644 and owner root:wheel.
+
+  W-5 resolution path (a):
+    ProgramArguments points at the /usr/local/fennec/bin/fennec wrapper
+    shell script, which exec's the system Node 22+ on PATH. The plist
+    does NOT hard-code an absolute path to node — corp environments
+    that vendor a specific node binary can swap the wrapper without
+    touching this plist. Postinstall warns about the Node 22+ pre-req.
+
+  Always-on (CrowdStrike-style per D-01):
+    - RunAtLoad: launchd boots the daemon at machine startup.
+    - KeepAlive: launchd respawns if the process dies.
+    - UserName/GroupName root/wheel: daemon needs to read
+      /var/db/fennec/key (mode 0400 root) and write
+      /Library/Application Support/ClaudeCode/managed-settings.json
+      (root-owned per D-19).
+
+  Logs are root-owned at /var/log/fennec/daemon.log; the install dir
+  is created by postinstall with mode 0750.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>dev.fennec.daemon</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/fennec/bin/fennec</string>
+        <string>daemon</string>
+    </array>
+
+    <key>UserName</key><string>root</string>
+
+    <key>GroupName</key><string>wheel</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>FENNEC_API_URL</key>
+        <string>https://api.fennec.dev</string>
+        <key>FENNEC_DAEMON_PORT</key>
+        <string>7821</string>
+        <key>PATH</key>
+        <string>/usr/local/fennec/bin:/usr/bin:/bin</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/var/log/fennec/daemon.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/var/log/fennec/daemon.log</string>
+</dict>
+</plist>

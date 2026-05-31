@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  fennec Helper LaunchAgent (Plan 01-09 Task 2, DAE-20, Pattern 6).
+
+  Per-user-session helper for tray notifications. macOS LaunchDaemons
+  (which run as root) cannot interact with the GUI; this Agent does.
+  The root daemon POSTs to http://127.0.0.1:7822/v1/notify; this Agent
+  renders the system notification + optionally opens a URL in the
+  user's default browser.
+
+  Placed at /Library/LaunchAgents/dev.fennec.notifier.plist during
+  postinstall with mode 0644 and owner root:wheel. Loads for every
+  user that signs in on this machine (the system-wide LaunchAgents
+  location).
+
+  Companion: installer/macos/notifier-launchagent.plist from Plan
+  01-08 (Label com.fennec.notifier) — kept as a reference. Plan 01-09
+  uses the dev.fennec.notifier identifier consistently with the
+  LaunchDaemon.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>dev.fennec.notifier</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/fennec/bin/fennec-notifier</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>FENNEC_NOTIFIER_PORT</key>
+        <string>7822</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/var/log/fennec/notifier.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/var/log/fennec/notifier.log</string>
+</dict>
+</plist>

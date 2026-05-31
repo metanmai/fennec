@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>fennec installed</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; font-size: 13px; color: #222; line-height: 1.5; padding: 16px 20px; }
+    h1 { font-size: 17px; margin: 0 0 8px 0; }
+    h2 { font-size: 14px; margin: 16px 0 6px 0; }
+    ul { margin: 6px 0 6px 18px; padding: 0; }
+    li { margin: 2px 0; }
+    code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+    .note { color: #555; font-size: 12px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h1>fennec installed</h1>
+
+  <p>The fennec daemon binaries, LaunchDaemon, and Helper LaunchAgent
+  configurations are now in place on this Mac.</p>
+
+  <h2>Next steps</h2>
+
+  <p><strong>Personal use:</strong> open Terminal and run
+  <code>sudo fennec wizard</code>. The wizard will prompt for your org's
+  install secret, register the daemon, and walk you through the SSO
+  attach flow.</p>
+
+  <p><strong>Org-tier (MDM):</strong> Your IT admin pushes a Configuration
+  Profile via your MDM tool (Jamf, Intune, Workspace ONE). The .pkg
+  postinstall script detects the profile automatically and brings the
+  daemon online without further prompting. The tray notification will
+  appear on next login asking you to sign in.</p>
+
+  <h2>Where things live</h2>
+  <ul>
+    <li><code>/usr/local/fennec/bin/fennec</code> — CLI wrapper</li>
+    <li><code>/usr/local/fennec/bin/fennec-hook</code> — Claude Code hook shim</li>
+    <li><code>/usr/local/fennec/bin/fennec-notifier</code> — Helper LaunchAgent binary</li>
+    <li><code>/Library/LaunchDaemons/dev.fennec.daemon.plist</code> — system daemon</li>
+    <li><code>/Library/LaunchAgents/dev.fennec.notifier.plist</code> — per-user helper</li>
+    <li><code>/var/log/fennec/daemon.log</code> — daemon log (root-readable)</li>
+  </ul>
+
+  <p class="note">To uninstall: <code>sudo fennec uninstall</code> (or your
+  IT admin removes the MDM profile, triggering the uninstall path).</p>
+</body>
+</html>

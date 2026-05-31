@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Welcome to fennec</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; font-size: 13px; color: #222; line-height: 1.5; padding: 16px 20px; }
+    h1 { font-size: 17px; margin: 0 0 8px 0; }
+    h2 { font-size: 14px; margin: 16px 0 6px 0; }
+    ul { margin: 6px 0 6px 18px; padding: 0; }
+    li { margin: 2px 0; }
+    code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+    .warn { color: #b35900; }
+    .note { color: #555; font-size: 12px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>fennec — AI usage observability for your org</h1>
+
+  <p>fennec captures AI usage events on this machine and sends them to your
+  org's fennec instance over HTTPS so engineering leaders can answer:
+  <em>who is prompting how</em>, <em>where the money goes by project</em>,
+  and <em>is the right model being used for each task</em>?</p>
+
+  <h2>What gets captured</h2>
+  <ul>
+    <li>Claude Code prompts and responses (6 hook events)</li>
+    <li>Anthropic token counts (input, output, cache creation, cache read)</li>
+    <li>Workspace metadata (current directory, git remote, git branch)</li>
+  </ul>
+
+  <h2>What gets redacted before any data leaves this machine</h2>
+  <ul>
+    <li>Secrets matching the gitleaks v8.21.0 default ruleset (~181 patterns)</li>
+    <li>Plus 4 fennec-supplemental rules: Anthropic API keys, opaque Bearer tokens,
+        PEM headers, GCP API keys</li>
+  </ul>
+
+  <h2 class="warn">Prerequisite: Node.js 22 LTS or later on PATH</h2>
+  <p>The fennec daemon wrapper at <code>/usr/local/fennec/bin/fennec</code> exec's
+  <code>node</code> from the system PATH. If Node is not installed, the postinstall
+  script will warn you and the daemon will not start until you install it.</p>
+
+  <ul>
+    <li>Recommended: <code>brew install node@22</code></li>
+    <li>Or download from <a href="https://nodejs.org/">https://nodejs.org/</a></li>
+  </ul>
+
+  <p class="note">After installation, see the included <code>PRIVACY.md</code> for full
+  details on what's captured, how it's redacted, and where the data flows.</p>
+</body>
+</html>

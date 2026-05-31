@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  fennec productbuild Distribution document (Plan 01-09 Task 2).
+
+  Drives the .pkg installer UI:
+    - welcome.html shown on first screen
+    - conclusion.html shown after install completes
+    - Min macOS 13.0 (Ventura) gate enforced
+
+  Used by build-pkg.sh:
+    productbuild --distribution Distribution.xml --resources Resources/
+                 --package-path build/  build/fennec-unsigned.pkg
+-->
+<installer-gui-script minSpecVersion="1">
+    <title>fennec</title>
+    <organization>dev.fennec</organization>
+
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+
+    <!-- Volume + OS gates -->
+    <volume-check>
+        <allowed-os-versions>
+            <os-version min="13.0"/>
+        </allowed-os-versions>
+    </volume-check>
+
+    <!-- Options: this is a non-customisable, scripts-required, root-only install -->
+    <options customize="never" require-scripts="true" rootVolumeOnly="true"/>
+
+    <!-- Choices outline — single choice that installs everything -->
+    <choices-outline>
+        <line choice="default"/>
+    </choices-outline>
+
+    <choice id="default" title="fennec">
+        <pkg-ref id="dev.fennec"/>
+    </choice>
+
+    <!-- Component package reference -->
+    <pkg-ref id="dev.fennec" version="0.1.0" auth="root">fennec-component.pkg</pkg-ref>
+</installer-gui-script>
