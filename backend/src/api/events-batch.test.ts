@@ -34,7 +34,7 @@ function buildEvent(overrides: Partial<CanonicalEvent> = {}): CanonicalEvent {
     occurred_at: "2026-05-31T12:00:00.000Z",
     hostname: "phase1-host",
     os: "darwin",
-    kind: "prompt",
+    kind: "prompt_submitted",
     payload: { hello: "world" },
     schema_version: 1,
     redaction_applied_at: "2026-05-31T12:00:00.000Z",
