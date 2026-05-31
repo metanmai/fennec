@@ -7,7 +7,7 @@
  *  - Test 3: win32 → ${ProgramData}\ClaudeCode\managed-settings.json (D-19)
  */
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { resolveManagedSettingsPath } from "./path.js";
 
 describe("resolveManagedSettingsPath", () => {
