@@ -107,7 +107,16 @@ Append a row each time procurement state advances (purchase, ID-verification, HS
 | Date (UTC) | Event | Details |
 |------------|-------|---------|
 | 2026-05-31 | Status doc created | Plan 01-03 autonomous Task — playbooks + scripts authored. Awaiting user procurement. |
+| 2026-05-31 | Local Go toolchain verified | Plan 01-07 Task 1 — `go version go1.25.7 darwin/arm64` at `/opt/homebrew/bin/.goenv/versions/1.25.7/bin/go` (goenv-managed; shim broken but binary works via absolute path). Shim Makefile + build commands use the absolute path explicitly. |
 |            |       |         |
+
+---
+
+## Local Tooling
+
+| Tool         | Version | Install method                                                                    | Date installed | Path                                                       |
+|--------------|---------|-----------------------------------------------------------------------------------|----------------|------------------------------------------------------------|
+| Go toolchain | 1.25.7  | goenv (`brew install goenv` → `goenv install 1.25.7`)                             | 2026-05-31     | `/opt/homebrew/bin/.goenv/versions/1.25.7/bin/go` (goenv shim on `which go` is broken on this host — use the absolute path) |
 
 ---
 
