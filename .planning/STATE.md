@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 1 context gathered
-last_updated: "2026-05-31T05:32:03.282Z"
+stopped_at: Completed Plan 01-02 (canonical event schema in @fennec/shared)
+last_updated: "2026-05-31T05:54:06.136Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 10
-  completed_plans: 0
+  completed_plans: 2
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 1 of 6 (Foundations)
-Plan: 2 of 10 in current phase
+Plan: 3 of 10 in current phase
 Status: Ready to execute
 Last activity: 2026-05-31
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 1 P1 | 11 | 4 tasks | 21 files |
+| Phase 01 P02 | 33 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,10 @@ Recent decisions affecting current work:
 - [Phase ?]: 01-01 — wrangler pinned to 4.93.1 (corp proxy blocks rosie-skills transitive from 4.94.0+); Phase 5 follow-up to revisit
 - [Phase ?]: 01-01 — npm 'workspace:*' protocol blocked by corp proxy; cross-workspace deps use plain '*'
 - [Phase ?]: 01-01 — biome.json migrated to v2.4.16 schema (files.includes + assist.actions.source.organizeImports)
+- [Phase ?]: 01-02 — deriveIdempotencyKey uses Web Crypto API (crypto.subtle.digest) not node:crypto, so @fennec/shared stays runtime-neutral for Workers
+- [Phase ?]: 01-02 — Anthropic Usage cache tokens captured as 4 SEPARATE optional non-negative ints (ANL-06 / T-02-03 / PITFALL P6); Assumption A2 totals deferred to Plan 01-06
+- [Phase ?]: 01-02 — CanonicalEventSchema OMITS org_id/user_id (backend stamps tenancy from api_key lookup per Pattern 11 / threat T-02-01)
+- [Phase ?]: 01-02 — PKCE verifier enforced 43-128 chars per RFC 7636 4.1 on AttachCallbackRequestSchema; AdapterHeartbeat counters required-not-optional even at zero
 
 ### Pending Todos
 
@@ -93,6 +98,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T05:31:42.217Z
-Stopped at: Phase 1 context gathered
+Last session: 2026-05-31T05:54:06.130Z
+Stopped at: Completed Plan 01-02 (canonical event schema in @fennec/shared)
 Resume file: None

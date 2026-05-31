@@ -20,10 +20,10 @@ The local daemon and adapters that capture AI usage at the source.
 - [ ] **CAP-07**: Browser extension (Manifest V3) captures ChatGPT.com AI usage and posts events to daemon's loopback bridge
 - [ ] **CAP-08**: Browser extension (Manifest V3) captures Claude.ai AI usage and posts events to daemon's loopback bridge
 - [ ] **CAP-09**: Daemon captures local git activity (commits, reverts, file edits, branch switches) via a dedicated git-watcher adapter
-- [ ] **CAP-10**: All adapters emit events conforming to a single canonical `CanonicalEvent` schema defined in `packages/shared/`
+- [x] **CAP-10**: All adapters emit events conforming to a single canonical `CanonicalEvent` schema defined in `packages/shared/`
 - [ ] **CAP-11**: Local queue is append-only and crash-safe (JSONL with explicit rotation; synapse pattern)
 - [ ] **CAP-12**: Sync loop batches events (100 per batch or 5-second flush) and POSTs to backend; watermark advances on 2xx, exponential backoff on 5xx
-- [ ] **CAP-13**: Each event carries a stable `idempotency_key` so the backend can dedupe on retry
+- [x] **CAP-13**: Each event carries a stable `idempotency_key` so the backend can dedupe on retry
 - [ ] **CAP-14**: Every adapter emits a periodic heartbeat including `events_parsed` and `parse_errors`, even when zero events captured, so dashboards can tell "no AI usage" apart from "adapter broken"
 - [ ] **CAP-15**: Adapters detect schema-hash drift in source-tool data and surface an "adapter offline" status when the upstream format changes
 - [ ] **CAP-16**: Daemon survives offline / network blips with no event loss (events stay in local queue until sync succeeds)
@@ -79,7 +79,7 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **ANL-03**: Reverts explicitly downgrade attribution rather than silently subtracting from totals
 - [ ] **ANL-04**: Model-fit worker (Queue consumer) scores each captured prompt against the model used, using rule-based v1 heuristics (length, file-edit size, tool-call count, model tier)
 - [ ] **ANL-05**: Daily aggregator (cron) writes pre-rolled `daily_rollups_by_user` and `daily_rollups_by_project`; frontend reads only rollups, never raw events
-- [ ] **ANL-06**: Cost calculation captures `cache_creation_input_tokens` and `cache_read_input_tokens` separately (avoids the LiteLLM-style 70%+ miscount bug)
+- [x] **ANL-06**: Cost calculation captures `cache_creation_input_tokens` and `cache_read_input_tokens` separately (avoids the LiteLLM-style 70%+ miscount bug)
 - [ ] **ANL-07**: Cost is reported with separate "estimated" (tokens × current price) and "billed" (vendor-billing-reconciled, where available) columns
 - [ ] **ANL-08**: Pricing data lives in a table with effective-date ranges, not hardcoded constants
 - [ ] **ANL-09**: Subscription products (Copilot $19/mo, ChatGPT Pro $20/mo) are accounted for separately from per-token spend
@@ -230,10 +230,10 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | CAP-07 | Phase 2 | Pending |
 | CAP-08 | Phase 2 | Pending |
 | CAP-09 | Phase 2 | Pending |
-| CAP-10 | Phase 1 | Pending |
+| CAP-10 | Phase 1 | Complete |
 | CAP-11 | Phase 1 | Pending |
 | CAP-12 | Phase 1 | Pending |
-| CAP-13 | Phase 1 | Pending |
+| CAP-13 | Phase 1 | Complete |
 | CAP-14 | Phase 1 | Pending |
 | CAP-15 | Phase 1 | Pending |
 | CAP-16 | Phase 1 | Pending |
@@ -273,7 +273,7 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | ANL-03 | Phase 2 | Pending |
 | ANL-04 | Phase 2 | Pending |
 | ANL-05 | Phase 2 | Pending |
-| ANL-06 | Phase 1 | Pending |
+| ANL-06 | Phase 1 | Complete |
 | ANL-07 | Phase 2 | Pending |
 | ANL-08 | Phase 2 | Pending |
 | ANL-09 | Phase 2 | Pending |
