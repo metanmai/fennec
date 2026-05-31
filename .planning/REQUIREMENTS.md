@@ -41,7 +41,7 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [ ] **PRIV-04**: Per-org KMS encryption at rest for stored prompts and responses (cloud tier)
 - [ ] **PRIV-05**: Documented GDPR Article-17 deletion path; org admin can issue a deletion request that purges prompts within SLA
 - [ ] **PRIV-06**: Per-developer dashboards default to org-aggregate / anonymised view; per-developer breakdowns require an explicit admin opt-in with a visible audit trail
-- [ ] **PRIV-07**: First-run installer surfaces a consent screen showing exactly what's captured before any hooks are written
+- [x] **PRIV-07**: First-run installer surfaces a consent screen showing exactly what's captured before any hooks are written
 
 ### Authentication & Multi-tenancy (AUTH)
 
@@ -104,11 +104,11 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 
 ### Daemon Lifecycle (DAE)
 
-- [ ] **DAE-01**: `fennec wizard` runs an interactive installer (sign-in, capture-mechanism choice per surface, service install) — for personal-tier installs
-- [ ] **DAE-02**: `fennec init --install-secret <secret>` runs the same install non-interactively (used by MDM payload execution for org-tier installs)
+- [x] **DAE-01**: `fennec wizard` runs an interactive installer (sign-in, capture-mechanism choice per surface, service install) — for personal-tier installs
+- [x] **DAE-02**: `fennec init --install-secret <secret>` runs the same install non-interactively (used by MDM payload execution for org-tier installs)
 - [ ] **DAE-03**: `fennec status` prints a one-line health check (daemon up? queue depth? last sync? adapters running?)
 - [ ] **DAE-04**: `fennec doctor` runs detailed diagnostics (paths, permissions, last events, recent errors, proxy / CA status, code-sign verification)
-- [ ] **DAE-05**: Daemon installs as a macOS **LaunchDaemon** (system-level, root-owned plist at `/Library/LaunchDaemons/dev.fennec.daemon.plist`) — not LaunchAgent
+- [x] **DAE-05**: Daemon installs as a macOS **LaunchDaemon** (system-level, root-owned plist at `/Library/LaunchDaemons/dev.fennec.daemon.plist`) — not LaunchAgent
 - [ ] **DAE-06**: Daemon installs as a Linux systemd **system unit** (root-owned, `/etc/systemd/system/fennec.service`)
 - [ ] **DAE-07**: Daemon installs as a Windows service (node-windows or NSSM), running under the SYSTEM account
 - [ ] **DAE-08**: macOS binary + `.pkg` are signed with an Apple Developer ID certificate, notarised via `notarytool`, and stapled
@@ -124,7 +124,7 @@ Trust-failure prevention. Must ship with capture or it cannot be retrofitted saf
 - [x] **DAE-18**: Hook handler is a compiled shim binary at `/usr/local/fennec/bin/fennec-hook` (Windows: `C:\Program Files\fennec\bin\fennec-hook.exe`) that IPCs to the running daemon via loopback bridge (HTTP or Unix socket) with ≤15ms overhead per hook fire; fails open if daemon is unreachable (Claude Code never blocked)
 - [x] **DAE-19**: `fennec uninstall` removes only fennec's entries from managed-settings (surgical, leaves synapse user-settings untouched), requires the org-token in org-tier installs or sudo in personal-tier, and emits an audit event visible to the org admin
 - [x] **DAE-20**: Daemon surfaces a system tray notification when no developer identity is attached after enrollment; the notification persists across reboots until SSO attach completes (see AUTH-16)
-- [ ] **DAE-21**: MDM packaging primitives in Phase 1 — the signed `.pkg` accepts an org install secret via a documented config-key schema; polished Jamf Configuration Profile, Intune ADMX, and Workspace ONE manifest templates land in Phase 5
+- [x] **DAE-21**: MDM packaging primitives in Phase 1 — the signed `.pkg` accepts an org install secret via a documented config-key schema; polished Jamf Configuration Profile, Intune ADMX, and Workspace ONE manifest templates land in Phase 5
 
 ### Distribution (DIST)
 
@@ -244,7 +244,7 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | PRIV-04 | Phase 3 | Pending |
 | PRIV-05 | Phase 3 | Pending |
 | PRIV-06 | Phase 3 | Pending |
-| PRIV-07 | Phase 1 | Pending |
+| PRIV-07 | Phase 1 | Complete |
 | AUTH-01 | Phase 3 | Pending |
 | AUTH-02 | Phase 3 | Pending |
 | AUTH-03 | Phase 3 | Pending |
@@ -292,11 +292,11 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | DASH-13 | Phase 4 | Pending |
 | DASH-14 | Phase 4 | Pending |
 | DASH-15 | Phase 4 | Pending |
-| DAE-01 | Phase 1 | Pending |
-| DAE-02 | Phase 1 | Pending |
+| DAE-01 | Phase 1 | Complete |
+| DAE-02 | Phase 1 | Complete |
 | DAE-03 | Phase 4 | Pending |
 | DAE-04 | Phase 5 | Pending |
-| DAE-05 | Phase 1 | Pending |
+| DAE-05 | Phase 1 | Complete |
 | DAE-06 | Phase 5 | Pending |
 | DAE-07 | Phase 5 | Pending |
 | DAE-08 | Phase 1 | Pending |
@@ -312,7 +312,7 @@ Mapped 2026-05-31. Updated to reflect Phase 1 discussion decisions D-27 through 
 | DAE-18 | Phase 1 | Complete |
 | DAE-19 | Phase 1 | Complete |
 | DAE-20 | Phase 1 | Complete |
-| DAE-21 | Phase 1 | Pending |
+| DAE-21 | Phase 1 | Complete |
 | DIST-01 | Phase 6 | Pending |
 | DIST-02 | Phase 6 | Pending |
 | DIST-03 | Phase 6 | Pending |

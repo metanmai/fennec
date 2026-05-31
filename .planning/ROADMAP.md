@@ -62,7 +62,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 01-09-PLAN.md — macOS installer: fennec CLI dispatcher (wizard/init/uninstall/daemon), LaunchDaemon + Helper LaunchAgent plists, build-pkg.sh pipeline (pkgbuild → productbuild → notarytool --wait → stapler → spctl assert), Configuration Profile MDM primitive, docs/PRIVACY.md, signed+notarised fennec.pkg artefact
+- [x] 01-09-PLAN.md — macOS installer: fennec CLI dispatcher (wizard/init/uninstall/daemon), LaunchDaemon + Helper LaunchAgent plists, build-pkg.sh pipeline (pkgbuild → productbuild → notarytool --wait → stapler → spctl assert), Configuration Profile MDM primitive, docs/PRIVACY.md, signed+notarised fennec.pkg artefact
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations | 8/10 | In Progress|  |
+| 1. Foundations | 9/10 | In Progress|  |
 | 2. Parallel Adapters + Backend Analysis | 0/TBD | Not started | - |
 | 3. Multi-Tenant Backend Maturity | 0/TBD | Not started | - |
 | 4. Dashboards | 0/TBD | Not started | - |

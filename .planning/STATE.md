@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: "Plan 01-07 complete: Claude Code hook adapter — Go shim + loopback bridge + payload normaliser + managed-settings install/uninstall. 4 tasks, 6 commits owned, 136/136 daemon tests pass, 4/4 Go tests pass."
-last_updated: "2026-05-31T07:59:11.119Z"
+last_updated: "2026-05-31T08:21:10.910Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 1 of 6 (Foundations)
-Plan: 8 of 10 in current phase
+Plan: 9 of 10 in current phase
 Status: Ready to execute
 Last activity: 2026-05-31
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [████████░░] 80%
 | Phase 01-foundations P06 | 22 min | - tasks | - files |
 | Phase 1 P08 | 11min | 3 tasks | 19 files |
 | Phase 01-foundations P07 | ~15min | - tasks | - files |
+| Phase 01 P09 | 12min | 2 + partial Task 3 tasks | 21 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,10 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 01]: 01-07 — Claude Code adapter is normalisation-only; redaction lives in registry's emit chain. All 4 Anthropic Usage tokens preserved VERBATIM per A2 option c — no aggregation, no totals.
 - [Phase ?]: [Phase 01]: 01-07 — Managed-settings install is additive (D-20 synapse coexistence); uninstall is surgical (D-24 — filter by command-equality + unlink when empty). Byte-equal SHA-256 on user-settings asserts DAE-11.
 - [Phase ?]: [Phase 01]: 01-07 — Concurrent commit race during lint-staged: 4 RED test files cross-attributed to 01-08 commit 2860d40. Functionally correct; audit-trail misaligned (documented in 01-07 SUMMARY Deviation #2).
+- [Phase ?]: [Phase 01]: 01-09 — W-5 contradiction resolved per path (a): /usr/local/fennec/bin/fennec wrapper exec's node from PATH; LaunchDaemon ProgramArguments points at wrapper
+- [Phase ?]: [Phase 01]: 01-09 — CLI dispatcher in daemon/src/index.ts runs iff fileURLToPath(import.meta.url)===argv[1]; library imports stay no-op
+- [Phase ?]: [Phase 01]: 01-09 — Configuration.plist ships as MDM PRIMITIVE per D-09 with REPLACE_WITH_* placeholders; polished Jamf/Intune templates land in Phase 5
+- [Phase ?]: [Phase 01]: 01-09 PARTIAL — Tasks 1+2 complete; Task 3 UNSIGNED .pkg built (SHA-256 5b25f5bd...); HALT on signed step pending Apple Dev Program enrolment
 
 ### Pending Todos
 
@@ -130,6 +135,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T07:59:11.113Z
+Last session: 2026-05-31T08:20:40.725Z
 Stopped at: Plan 01-07 complete: Claude Code hook adapter — Go shim + loopback bridge + payload normaliser + managed-settings install/uninstall. 4 tasks, 6 commits owned, 136/136 daemon tests pass, 4/4 Go tests pass.
 Resume file: None
