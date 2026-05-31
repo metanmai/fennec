@@ -42,7 +42,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — Wave 0 monorepo + TS/Biome/Vitest/Playwright + husky/CI + canary secret fixtures + .env.example
+- [x] 01-01-PLAN.md — Wave 0 monorepo + TS/Biome/Vitest/Playwright + husky/CI + canary secret fixtures + .env.example
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations | 0/10 | Planned | - |
+| 1. Foundations | 1/10 | In Progress|  |
 | 2. Parallel Adapters + Backend Analysis | 0/TBD | Not started | - |
 | 3. Multi-Tenant Backend Maturity | 0/TBD | Not started | - |
 | 4. Dashboards | 0/TBD | Not started | - |
