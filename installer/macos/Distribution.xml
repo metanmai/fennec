@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  fennec productbuild Distribution document (Plan 01-09 Task 2).
-
-  Drives the .pkg installer UI:
-    - welcome.html shown on first screen
-    - conclusion.html shown after install completes
-    - Min macOS 13.0 (Ventura) gate enforced
-
-  Used by build-pkg.sh:
-    productbuild --distribution Distribution.xml --resources Resources/
-                 --package-path build/  build/fennec-unsigned.pkg
--->
+<!-- fennec productbuild Distribution document (Plan 01-09 Task 2).
+     Drives the .pkg installer UI: welcome.html / conclusion.html /
+     min macOS 13.0 gate. Invoked by build-pkg.sh. -->
 <installer-gui-script minSpecVersion="1">
     <title>fennec</title>
     <organization>dev.fennec</organization>
