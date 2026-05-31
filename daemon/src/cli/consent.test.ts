@@ -46,7 +46,7 @@ describe("consent.renderInteractive", () => {
   test("returns false when user cancels (Ctrl+C / symbol)", async () => {
     const cancelSymbol = Symbol("cancel");
     (clackMock.confirm as ReturnType<typeof vi.fn>).mockResolvedValueOnce(cancelSymbol);
-    (clackMock.isCancel as ReturnType<typeof vi.fn>).mockReturnValueOnce(true);
+    (clackMock.isCancel as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(true);
     const result = await renderInteractive({ apiBaseUrl: "https://api.fennec.dev" });
     expect(result).toBe(false);
   });
