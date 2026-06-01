@@ -1,17 +1,26 @@
 ---
 phase: 01-foundations
 verified: 2026-05-31T22:30:00Z
+re_verified: 2026-06-01T17:25:00Z
 status: human_needed
 score: 4/7 ROADMAP success criteria verifiable locally; 3/7 gated on live infrastructure; 33/36 REQ-IDs complete; 3/36 procurement-gated
 overrides_applied: 0
-re_verification: false
+re_verification: true
 verifier: gsd-verifier (goal-backward against ROADMAP §Phase 1 7 success criteria)
 posture: |
   Honest partial verification. Saved E2E philosophy explicitly rejects "mostly passing" as a pass:
   unit tests catch code regressions; E2E catches product regressions; both required.
-  This phase is fully exercised LOCALLY (all autonomous deliverables shipped, all 278 local
+  This phase is fully exercised LOCALLY (all autonomous deliverables shipped, all 282 local
   tests green) but the LIVE pipeline cannot run until external procurement + deployment is done.
   This is the correct phase-1 closing state for an MDM-shipped, signed-installer-only product.
+
+  2026-06-01 update: the post-Wave-5 daemon-orchestration wiring commit (the only
+  non-procurement blocker) has landed — commit aae59e5. `daemon/src/index.ts`
+  case "daemon" now boots AdapterRegistry + LoopbackBridge + ClaudeCodeAdapter +
+  SyncLoop + HeartbeatScheduler with graceful SIGTERM/SIGINT shutdown. 4/4 smoke
+  tests in `daemon/src/cli/daemon.test.ts` green; full daemon suite 159/159. The
+  remaining "human_needed" status is now purely procurement-gated (Apple Dev cert,
+  Windows EV cert, Supabase project, Cloudflare deploy).
 
 # Pseudo-must_haves derived goal-backward from the 7 ROADMAP success criteria.
 must_haves:
@@ -65,11 +74,10 @@ human_verification:
     eta: "~10-15 min after cert in keychain (notarytool --wait dominates)"
 
   - test: "Orchestrator post-Wave-5 integration commit: wire daemon/src/index.ts case 'daemon' to actually boot the daemon"
-    expected: "`fennec daemon` (invoked by LaunchDaemon plist) starts AdapterRegistry, registers ClaudeCodeAdapter, binds LoopbackBridge to 127.0.0.1:7821 with FENNEC_SHIM_SECRET, starts SyncLoop, starts HeartbeatScheduler. Currently a placeholder that blocks forever (acknowledged in both 01-09 SUMMARY and 01-10 SUMMARY as the post-Wave-5 wiring step the orchestrator owns)."
-    why_human: "This is the one piece of Phase-1 work that is NEITHER autonomous-shipped NOR procurement-gated — it's an integration commit the orchestrator must author after all the component modules are in place. Without it, the live spec halts at Step 2 (daemon /v1/health) and SC1/SC4/SC5/SC6 cannot pass."
-    blocks: ["SC1 live", "SC4 live", "SC5 live", "SC6 live"]
-    location: "daemon/src/index.ts lines 163-177"
-    eta: "~30-60 min for an engineer who knows the codebase (all components exist; this is wiring only)"
+    expected: "`fennec daemon` (invoked by LaunchDaemon plist) starts AdapterRegistry, registers ClaudeCodeAdapter, binds LoopbackBridge to 127.0.0.1:7821 with FENNEC_SHIM_SECRET, starts SyncLoop, starts HeartbeatScheduler."
+    status: "CLOSED 2026-06-01 (commit aae59e5)"
+    resolution: "`runDaemon()` lives in `daemon/src/cli/daemon.ts`; `case 'daemon'` in `daemon/src/index.ts` now `await runDaemonFn({ os }); await handle.done`. SIGTERM/SIGINT trigger graceful shutdown: heartbeat.tick → heartbeat.stop → syncLoop.flushNow → syncLoop.stop → bridge.stop → registry.stopAll (reverse boot order). Pre-enrollment friendly: a missing shim-secret seeds an unguessable in-memory sentinel so every POST 401s until `fennec wizard`/`init` writes the real one. Smoke test `daemon/src/cli/daemon.test.ts` 4/4 green (boot + bind + shutdown; real POST round-trips through bridge → adapter → registry → JSONL queue end-to-end; missing-secret pre-enrollment behaviour; injected shutdownSignal trigger). Full daemon suite 159/159."
+    blocks: []  # No longer blocks anything; SC1/SC4/SC5/SC6 are now infra-only gated.
 
   - test: "End-to-end Claude Code smoke + 01-SMOKE-LOG.md populated"
     expected: "After Tasks 2-4 + integration commit complete, `npx playwright test tests/e2e/01-phase-1-smoke.spec.ts` exits 0; all 8 Playwright steps PASS; tests/manual/synapse-coexistence-smoke.sh confirms both synapse + fennec hooks fire on one Claude Code event; .planning/phases/01-foundations/01-SMOKE-LOG.md created with Steps 1-4 outputs + screenshots."
@@ -101,7 +109,7 @@ human_verification:
 | ROADMAP Phase 1 success criteria — LIVE half | **0 of 7 verifiable** — Supabase / Cloudflare / Apple cert / Win EV cert / Claude Code installation all needed |
 | Phase 1 REQ-IDs marked Complete | **33 of 36** (REQUIREMENTS.md authoritative) |
 | Phase 1 REQ-IDs Pending | **3** — DAE-08 (Apple notarisation), DAE-09 (Win EV signing), DAE-12 (signed .pkg distribution) — all procurement-gated |
-| 🛑 Critical wiring gap | **daemon/src/index.ts case "daemon"** is a placeholder that blocks forever; the post-Wave-5 orchestrator integration commit has not landed. This is the one piece of work that's neither autonomous-shipped nor procurement-gated. |
+| ✅ Critical wiring gap | **CLOSED 2026-06-01 (commit aae59e5)** — `daemon/src/index.ts` case "daemon" now boots `runDaemon()` (registry + bridge + adapter + sync + heartbeat) with graceful SIGTERM/SIGINT shutdown. 4/4 smoke tests green in `daemon/src/cli/daemon.test.ts`; full daemon suite 159/159. The only Phase 1 unblockers remaining are now purely procurement-gated (Apple Dev cert, Windows EV cert, Supabase project, Cloudflare deploy). |
 
 ---
 
@@ -193,7 +201,7 @@ Every load-bearing claim from the 10 SUMMARYs was sample-verified. Results:
 | Helper LaunchAgent Go binary compiled for 4 platforms | 01-08, 01-09 | `notifier/build/` shows fennec-notifier-darwin-arm64 + darwin-amd64 + linux-amd64 + windows-amd64.exe (5.7-6.0MB each) | ✅ VERIFIED |
 | UNSIGNED .pkg built with SHA-256 5b25f5bd004a22db4ceffa71dfb0e4638ae4bd87a6e7d72a8e3fa4e3268ce54a | 01-09 | `shasum -a 256 installer/build/fennec-unsigned.pkg` returns exactly `5b25f5bd004a22db4ceffa71dfb0e4638ae4bd87a6e7d72a8e3fa4e3268ce54a` | ✅ VERIFIED (exact match) |
 | 25 locally-runnable tests in tests/e2e/ + 155 daemon tests + 49 backend + 49 shared all green | 01-06, 01-07, 01-08, 01-09, 01-10 | `cd tests && npx vitest run` → 25/25 pass in 349ms; `npm -w @fennec/daemon run test` → 155/155 pass in 773ms; `npm -w backend run test` → 49/49 pass in 399ms; `npm -w @fennec/shared run test` → 49/49 pass in 186ms | ✅ VERIFIED (278 total) |
-| daemon/src/index.ts case "daemon" is a STUB that blocks forever | 01-09, 01-10 | `grep -nA 30 'case "daemon"' daemon/src/index.ts` shows lines 163-177: prints "fennec daemon: process bootstrap pending Wave-5 integration commit." then `await new Promise(() => { /* never */ })` | ⚠️ STUB (honest — SUMMARYs document this; the orchestrator's wiring commit is the unblocker) |
+| daemon/src/index.ts case "daemon" boots the full pipeline | 01-09, 01-10, post-Wave-5 wiring (commit aae59e5, 2026-06-01) | `grep -nA 12 'case "daemon"' daemon/src/index.ts` shows `await runDaemonFn({ os }); await handle.done`. `daemon/src/cli/daemon.ts` is the orchestrator (registry → bridge → adapter → sync → heartbeat with graceful SIGTERM/SIGINT shutdown). `daemon/src/cli/daemon.test.ts` 4/4 green; full daemon suite 159/159. | ✅ VERIFIED (wiring gap closed) |
 | 01-CERT-STATUS.md macOS + Windows sections all TODO | 01-03 | `grep -c TODO .planning/phases/01-foundations/01-CERT-STATUS.md` returns 37 (14 macOS + 22 Windows + 1 audit-trail placeholder) | ✅ VERIFIED (every field unfilled as claimed) |
 | 01-SMOKE-LOG.md does not exist yet | 01-10 | `ls .planning/phases/01-foundations/01-SMOKE-LOG.md` → "No such file or directory" | ✅ VERIFIED (file intentionally absent; populated by user during Tasks 2-5) |
 | signed installer/build/fennec.pkg does not exist | 01-09, 01-10 | `ls installer/build/fennec.pkg` → "No such file or directory" (only fennec-unsigned.pkg + fennec-component.pkg present) | ✅ VERIFIED (gated on Apple Dev cert) |
@@ -206,9 +214,9 @@ Every load-bearing claim from the 10 SUMMARYs was sample-verified. Results:
 
 These are NOT code gaps — they are external-action gates the user must clear. Listed in **dependency order** (each unblocks the next):
 
-### Priority 1 — Orchestrator integration commit (only non-procurement blocker)
+### Priority 1 — Orchestrator integration commit (CLOSED 2026-06-01, commit aae59e5)
 
-🛑 **`daemon/src/index.ts` case `"daemon"` must be wired to actually boot the daemon.** Current code (lines 163-177) prints a placeholder message and blocks forever on `new Promise(() => {})`. This is the ONE piece of Phase 1 work that is neither autonomous-shipped nor procurement-gated — it's a wiring commit the orchestrator owns.
+✅ **`daemon/src/index.ts` case `"daemon"` now boots the full daemon pipeline.** `runDaemon()` in `daemon/src/cli/daemon.ts` wires AdapterRegistry → LoopbackBridge → ClaudeCodeAdapter → SyncLoop → HeartbeatScheduler in the right order; SIGTERM/SIGINT triggers graceful shutdown in reverse order (final heartbeat tick → final flushNow → bridge.stop → registry.stopAll). Pre-enrollment friendly: a missing shim-secret seeds an unguessable in-memory sentinel so every POST 401s until `fennec wizard`/`init` writes the real one. **Smoke test (`daemon/src/cli/daemon.test.ts`) 4/4 green** — boot+bind+shutdown; real POST round-trips through bridge → adapter → registry → JSONL queue; missing-secret pre-enrollment; injected shutdownSignal trigger. **Full daemon suite 159/159.** All remaining Phase 1 unblockers are now purely procurement-gated.
 
 **What it needs to do:** start AdapterRegistry → register ClaudeCodeAdapter → bind LoopbackBridge to 127.0.0.1:7821 with FENNEC_SHIM_SECRET → start SyncLoop → start HeartbeatScheduler. All five components exist and are tested; this is purely the orchestration glue.
 
@@ -280,14 +288,14 @@ Plan 01-10 Task 5. Depends on Priorities 1-4 + 6.
 | Risk | Severity | Mitigation in shipped work | Residual risk |
 |------|----------|----------------------------|---------------|
 | User assumes Phase 1 is "done" because 9 of 10 plans marked complete | high | This VERIFICATION.md explicitly says `status: human_needed` + enumerates 7 unblockers | low (if user reads this doc) |
-| Daemon orchestration wiring is silently a stub that fails on first real install | high | Both 01-09 and 01-10 SUMMARYs explicitly flag this as a known stub awaiting orchestrator post-Wave-5 commit; this VERIFICATION elevates it to Priority 1 unblocker | low (impossible to miss now) |
+| ~~Daemon orchestration wiring is silently a stub~~ | ~~high~~ | **CLOSED 2026-06-01 (commit aae59e5)** — `runDaemon()` in `daemon/src/cli/daemon.ts` wires the full pipeline with graceful shutdown; 4/4 smoke tests + 159/159 daemon suite green. | none |
 | Apple Dev procurement takes longer than estimated and Phase 2 starts depending on signed .pkg | medium | Phase 5 cross-platform polish is the architectural reload point for daemon distribution; Phase 2 plans (adapters + correlation worker) do NOT depend on signed .pkg | low |
 | Windows EV cert reputation warm-up clock starts too late and Phase 5 SmartScreen acceptance is delayed | medium | Pitfall 4 documented in `installer/windows/CERT-PROCUREMENT.md`: Phase 1 acceptance is procurement + first-signature ONLY; full reputation is Phase 5 emergent outcome after .msi distribution | low |
 | Live OAuth provider mis-configuration causes attach-callback failures | low | All 3 providers (Google + GitHub + Microsoft) wired in `backend/src/api/attach-start.ts` + `attach-callback.ts`; backend is provider-agnostic; daemon picks one per smoke test | low |
 | Supabase project deletion mid-Phase-1 loses captured events | low | Phase 1 is a smoke test, not production data capture; project deletion = re-run `scripts/db-push.sh` | none |
 | `fennec uninstall` removes synapse entries (DAE-11 regression) | high | 5 tests in `tests/e2e/synapse-coexistence.test.ts` assert byte-equal SHA-256 of `~/.claude/settings.json` before/after install + uninstall + round-trip; surgical removal verified by command-equality filter | low |
 | Canary leak through redactor on a payload pattern not covered by gitleaks rules | high | 4 fennec-supplemental gitleaks rules layered on vendored upstream v8.21.0; 14 test sub-cases including per-canary `it.each` + multi-canary-in-one-prompt; W-4 SHA-256 pin enforced at two layers (build + canary test) | low (verified against the 10-canary fixture; new canary classes would need a rule addition) |
-| daemon/src/index.ts case "daemon" placeholder masks a deeper integration failure | medium | This is the explicit "the wiring is the unblocker" gap; once wired, the live spec exercises the full pipeline including LoopbackBridge bind + SyncLoop start | low (the integration is small + isolated; all components are individually tested) |
+| ~~case "daemon" placeholder masks a deeper integration failure~~ | ~~medium~~ | **CLOSED 2026-06-01 (commit aae59e5)** — end-to-end smoke test asserts a real POST round-trips bridge → adapter → registry → JSONL queue with redaction stamp. | none |
 
 ---
 
@@ -297,7 +305,7 @@ Scanned files modified by Phase 1 plans for stub indicators, debt markers, and h
 
 | Severity | Finding | File / Line | Resolution |
 |----------|---------|-------------|-----------|
-| 🛑 Blocker (load-bearing) | `case "daemon"` blocks forever on `new Promise(() => { /* never */ })` | `daemon/src/index.ts:163-177` | Orchestrator post-Wave-5 wiring commit. SUMMARYs in 01-09 + 01-10 + STATE.md all flag this — it is NOT hidden. |
+| ✅ Closed (was load-bearing blocker) | `case "daemon"` boots `runDaemon()` and awaits `handle.done` (graceful SIGTERM/SIGINT shutdown). | `daemon/src/index.ts` case "daemon" + `daemon/src/cli/daemon.ts` | Commit aae59e5 (2026-06-01). Smoke test 4/4 + daemon suite 159/159 green. |
 | ℹ Info (intentional placeholder) | `"sk-ant-api03-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"` | `daemon/src/redact/canary-test.ts:23` | Canary fixture string — the `XXXX...` is the canonical Anthropic test-key shape, not a TODO. Intentional. |
 | ✅ Clean | No `TBD` / `FIXME` / `TODO` / `HACK` markers in modified source code | daemon/src/, backend/src/, packages/shared/src/, shim/, notifier/, installer/ | grep confirmed |
 
@@ -379,12 +387,12 @@ But the **goal** ("a prompt typed in Claude Code on macOS arrives in Supabase vi
 2. **No Cloudflare Worker is deployed** — `backend/wrangler.jsonc` has placeholder Hyperdrive + KV IDs.
 3. **No Apple-notarised .pkg exists** — only the unsigned variant. A fresh macOS machine would reject install.
 4. **No real Claude Code session has been exercised** against this daemon.
-5. **The daemon's `case "daemon"` is a placeholder that blocks forever.** Even if 1-4 were resolved, the live spec would halt at `/v1/health` until the orchestrator wires the daemon orchestration boot.
+5. ~~**The daemon's `case "daemon"` is a placeholder that blocks forever.**~~ **CLOSED 2026-06-01 (commit aae59e5)** — `runDaemon()` orchestrates the full pipeline; 4/4 smoke + 159/159 daemon suite green.
 
-Of these, #5 is the only one Claude can fix; #1-4 are user external action.
+All five gaps were Claude-or-user-fixable. #5 (the only Claude-owned one) is now closed. #1-4 are user external action.
 
 **Closing this phase honestly requires:**
-- ~30-60 min orchestrator integration commit (wire `case "daemon"`)
+- ✅ ~~~30-60 min orchestrator integration commit (wire `case "daemon"`)~~ DONE 2026-06-01.
 - ~5 min user action (Supabase token)
 - ~20-40 min user action (Cloudflare + OAuth)
 - ~24h external (Apple Dev Program)
@@ -399,7 +407,7 @@ This is the correct landing point for an org-shipped, signed-installer, MDM-depl
 
 ## 10. Recommended Next Action
 
-**Most-leverage move:** land the orchestrator's post-Wave-5 integration commit (`daemon/src/index.ts case "daemon"` wiring). This is the only non-procurement blocker. After that:
+**Most-leverage move:** ~~land the orchestrator's post-Wave-5 integration commit~~ **DONE 2026-06-01 (commit aae59e5).** All remaining unblockers are now user-procurement actions. Next-highest leverage:
 
 - If user has bandwidth for ~30 min: Supabase + Cloudflare (Priorities 2 + 3) unlock SC1/SC4 live partial verification.
 - If user has bandwidth for ~24h cycle: Apple Dev Program enrollment in parallel (Priority 4) unlocks SC2 macOS half + full SC1/SC4/SC5/SC6/SC7 fresh-state smoke.
