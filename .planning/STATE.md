@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Plan 01-10 PARTIAL: Phase 1 smoke harness shipped (Task 1) — 25 locally-runnable tests green; Tasks 2-5 HALT for real Supabase + Cloudflare + Apple Dev cert + Claude Code. Locally-runnable subset (canary, synapse-coexistence, kill-9 idempotency) green; live tier (01-phase-1-smoke.spec.ts) authored + Playwright sees it but cannot run without infra."
-last_updated: "2026-05-31T14:10:00.000Z"
-last_activity: 2026-05-31
+stopped_at: "Phase 1 close-out: daemon orchestration wiring landed (commit aae59e5, 2026-06-01) — daemon/src/cli/daemon.ts wires registry → bridge → adapter → sync → heartbeat with graceful SIGTERM/SIGINT shutdown; 4/4 smoke tests green; full daemon suite 159/159. VERIFICATION.md updated (aaf253d) — Priority 1 wiring blocker CLOSED. Phase 1 status remains `human_needed` purely on procurement gates: Apple Dev cert, Win EV cert, Supabase project, Cloudflare deploy. Plan 01-10 Tasks 2-5 still HALT for live infra."
+last_updated: "2026-06-01T17:30:00.000Z"
+last_activity: 2026-06-01
 progress:
   total_phases: 6
   completed_phases: 0
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 1 of 6 (Foundations)
-Plan: 9 of 10 in current phase
-Status: Ready to execute
-Last activity: 2026-05-31
+Plan: 9 of 10 in current phase (Plan 01-10 PARTIAL — autonomous portion + post-Wave-5 wiring complete; live-tier tasks 2-5 procurement-gated)
+Status: human_needed (procurement only; no Claude-fixable work remaining for Phase 1)
+Last activity: 2026-06-01
 
 Progress: [█████████░] 90%
 
