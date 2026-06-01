@@ -35,6 +35,8 @@ export { AdapterRegistry } from "./adapters/registry.js";
 // Consent renderer (PRIV-07)
 export { renderInteractive, renderLogged } from "./cli/consent.js";
 // CLI surfaces (Plan 01-09 Task 1)
+export type { DaemonHandle, RunDaemonOptions } from "./cli/daemon.js";
+export { runDaemon } from "./cli/daemon.js";
 export { runInit } from "./cli/init.js";
 export { runUninstall } from "./cli/uninstall.js";
 export { runWizard } from "./cli/wizard.js";
@@ -161,18 +163,16 @@ async function dispatch(argv: readonly string[]): Promise<number> {
       return 0;
     }
     case "daemon": {
-      // The long-running daemon process. Plan 01-09 ships only the
-      // wrapper; the actual daemon startup (adapter-registry boot,
-      // SyncLoop start, HeartbeatScheduler start, LoopbackBridge bind)
-      // is implemented across Plans 01-06/07/08. For now this case
-      // prints a placeholder so the LaunchDaemon plist's invocation
-      // returns 0 instead of crashing — the full daemon orchestration
-      // boot is the wiring step the orchestrator does post-Wave-5.
-      process.stdout.write("fennec daemon: process bootstrap pending Wave-5 integration commit.\n");
-      // Block forever so KeepAlive doesn't respawn-loop.
-      await new Promise(() => {
-        /* never */
-      });
+      // Boot the long-lived daemon: adapter-registry +
+      // loopback-bridge + Claude Code adapter + sync loop +
+      // heartbeat scheduler. Returns a handle whose `done` promise
+      // resolves on SIGTERM/SIGINT (signal handlers installed inside
+      // runDaemon). The LaunchDaemon plist invokes this with
+      // KeepAlive=true, so process.exit on shutdown lets launchd
+      // respawn cleanly only when the daemon actually exits.
+      const { runDaemon: runDaemonFn } = await import("./cli/daemon.js");
+      const handle = await runDaemonFn({ os });
+      await handle.done;
       return 0;
     }
     case undefined:
