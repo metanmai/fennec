@@ -35,8 +35,19 @@ interface HookEntry {
   command: string;
 }
 
+/**
+ * Outer hook wrapper Claude Code expects under `hooks.<EventName>[]` —
+ * mirrors the install module's HookBlock. The optional `matcher` field
+ * narrows the block to a specific tool (e.g. "Bash"); fennec installs
+ * the matcher-less form.
+ */
+interface HookBlock {
+  matcher?: string;
+  hooks: HookEntry[];
+}
+
 interface ManagedSettings {
-  hooks?: Partial<Record<string, HookEntry[]>>;
+  hooks?: Partial<Record<string, HookBlock[]>>;
   [key: string]: unknown;
 }
 
@@ -68,19 +79,38 @@ export function removeFennecHooks(path: string, hookCommand: string): void {
   if (!data.hooks || typeof data.hooks !== "object" || Array.isArray(data.hooks)) {
     return;
   }
-  const hooks = data.hooks as Record<string, HookEntry[]>;
+  const hooks = data.hooks as Record<string, HookBlock[]>;
 
-  // 4. For each hook array, filter out fennec's entries. If the
-  //    remaining array is empty, delete the key entirely so the
-  //    file stays tidy.
+  // 4. For each hook event, walk the outer HookBlock array and strip
+  //    fennec entries from each block's inner `hooks` array. Blocks
+  //    whose inner array becomes empty are dropped entirely. Hook
+  //    events with no remaining blocks are deleted from the file.
+  //    This preserves any other tool's blocks verbatim (synapse
+  //    coexistence — DAE-11).
   for (const hookName of Object.keys(hooks)) {
-    const arr = hooks[hookName];
-    if (!Array.isArray(arr)) continue;
-    const filtered = arr.filter((entry) => entry?.command !== hookCommand);
-    if (filtered.length === 0) {
+    const blocks = hooks[hookName];
+    if (!Array.isArray(blocks)) continue;
+    const survivingBlocks: HookBlock[] = [];
+    for (const block of blocks) {
+      if (!Array.isArray(block?.hooks)) {
+        // Preserve blocks with weird shapes verbatim — we only ever
+        // strip our OWN entries.
+        survivingBlocks.push(block);
+        continue;
+      }
+      const remainingEntries = block.hooks.filter((entry) => entry?.command !== hookCommand);
+      if (remainingEntries.length === 0) {
+        // Drop the block entirely if it had ONLY our entries.
+        // If a non-fennec block was empty to begin with, that's fine —
+        // we'd still drop it (consistent with cleanup contract).
+        continue;
+      }
+      survivingBlocks.push({ ...block, hooks: remainingEntries });
+    }
+    if (survivingBlocks.length === 0) {
       delete hooks[hookName];
     } else {
-      hooks[hookName] = filtered;
+      hooks[hookName] = survivingBlocks;
     }
   }
 

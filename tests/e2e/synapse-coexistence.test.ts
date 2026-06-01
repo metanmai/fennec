@@ -76,28 +76,30 @@ describe("DAE-11 synapse coexistence (local, no infra)", () => {
   it("managed-settings contains fennec entries for all 6 D-22 hooks after install", () => {
     writeFennecHooks(managedSettings, FENNEC_HOOK_PATH, { skipChown: true });
     const parsed = JSON.parse(readFileSync(managedSettings, "utf8")) as {
-      hooks?: Record<string, Array<{ type: string; command: string }>>;
+      hooks?: Record<string, Array<{ hooks?: Array<{ type: string; command: string }> }>>;
     };
     expect(parsed.hooks).toBeDefined();
     const hookNames = Object.keys(parsed.hooks ?? {}).sort();
     expect(hookNames).toEqual([...ALL_HOOK_NAMES].sort());
 
-    // Every hook array should contain a fennec entry
+    // Every hook array should contain a fennec entry (nested HookBlock shape).
     for (const name of ALL_HOOK_NAMES) {
-      const entries = parsed.hooks?.[name] ?? [];
-      const hasFennec = entries.some((e) => e.command === FENNEC_HOOK_PATH);
+      const blocks = parsed.hooks?.[name] ?? [];
+      const allCommands = blocks.flatMap((b) => b.hooks?.map((e) => e.command) ?? []);
+      const hasFennec = allCommands.includes(FENNEC_HOOK_PATH);
       expect(hasFennec, `${name} missing fennec hook`).toBe(true);
     }
   });
 
   it("install is additive — pre-existing managed-settings entries are preserved", () => {
-    // Pre-populate managed-settings with a synapse-style entry
+    // Pre-populate managed-settings with a synapse-style entry in the
+    // nested HookBlock shape Claude Code actually uses.
     writeFileSync(
       managedSettings,
       JSON.stringify(
         {
           hooks: {
-            UserPromptSubmit: [{ type: "command", command: SYNAPSE_HOOK_PATH }],
+            UserPromptSubmit: [{ hooks: [{ type: "command", command: SYNAPSE_HOOK_PATH }] }],
           },
         },
         null,
@@ -109,13 +111,12 @@ describe("DAE-11 synapse coexistence (local, no infra)", () => {
     writeFennecHooks(managedSettings, FENNEC_HOOK_PATH, { skipChown: true });
 
     const afterInstall = JSON.parse(readFileSync(managedSettings, "utf8")) as {
-      hooks: Record<string, Array<{ type: string; command: string }>>;
+      hooks: Record<string, Array<{ hooks?: Array<{ type: string; command: string }> }>>;
     };
     const ups = afterInstall.hooks.UserPromptSubmit ?? [];
-    const hasSynapse = ups.some((e) => e.command === SYNAPSE_HOOK_PATH);
-    const hasFennec = ups.some((e) => e.command === FENNEC_HOOK_PATH);
-    expect(hasSynapse, "synapse entry removed during fennec install (D-20 broken)").toBe(true);
-    expect(hasFennec, "fennec entry missing after install").toBe(true);
+    const allCommands = ups.flatMap((b) => b.hooks?.map((e) => e.command) ?? []);
+    expect(allCommands, "synapse entry removed during fennec install (D-20 broken)").toContain(SYNAPSE_HOOK_PATH);
+    expect(allCommands, "fennec entry missing after install").toContain(FENNEC_HOOK_PATH);
   });
 
   it("surgical uninstall removes ONLY fennec entries from managed-settings", () => {
@@ -127,7 +128,7 @@ describe("DAE-11 synapse coexistence (local, no infra)", () => {
       JSON.stringify(
         {
           hooks: {
-            UserPromptSubmit: [{ type: "command", command: SYNAPSE_HOOK_PATH }],
+            UserPromptSubmit: [{ hooks: [{ type: "command", command: SYNAPSE_HOOK_PATH }] }],
           },
         },
         null,
@@ -140,13 +141,12 @@ describe("DAE-11 synapse coexistence (local, no infra)", () => {
     removeFennecHooks(managedSettings, FENNEC_HOOK_PATH);
 
     const afterUninstall = JSON.parse(readFileSync(managedSettings, "utf8")) as {
-      hooks: Record<string, Array<{ type: string; command: string }>>;
+      hooks: Record<string, Array<{ hooks?: Array<{ type: string; command: string }> }>>;
     };
     const ups = afterUninstall.hooks?.UserPromptSubmit ?? [];
-    const synapseStillThere = ups.some((e) => e.command === SYNAPSE_HOOK_PATH);
-    const fennecRemoved = !ups.some((e) => e.command === FENNEC_HOOK_PATH);
-    expect(synapseStillThere, "synapse entry incorrectly removed (D-24 broken)").toBe(true);
-    expect(fennecRemoved, "fennec entry survived uninstall").toBe(true);
+    const allCommands = ups.flatMap((b) => b.hooks?.map((e) => e.command) ?? []);
+    expect(allCommands, "synapse entry incorrectly removed (D-24 broken)").toContain(SYNAPSE_HOOK_PATH);
+    expect(allCommands, "fennec entry survived uninstall").not.toContain(FENNEC_HOOK_PATH);
   });
 
   it("user-settings file is byte-equal AGAIN after install+uninstall round trip", () => {

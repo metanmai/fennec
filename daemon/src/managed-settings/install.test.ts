@@ -50,11 +50,14 @@ describe("writeFennecHooks", () => {
     expect(data.hooks).toBeDefined();
     const hooks = data.hooks as Record<string, unknown>;
     for (const hookName of ALL_HOOK_NAMES) {
-      const entries = hooks[hookName] as Array<{ type: string; command: string }>;
-      expect(Array.isArray(entries), `${hookName} should be an array`).toBe(true);
-      expect(entries).toHaveLength(1);
-      expect(entries[0]?.type).toBe("command");
-      expect(entries[0]?.command).toBe(HOOK_CMD);
+      const blocks = hooks[hookName] as Array<{ hooks: Array<{ type: string; command: string }> }>;
+      expect(Array.isArray(blocks), `${hookName} should be an array of blocks`).toBe(true);
+      expect(blocks).toHaveLength(1);
+      const inner = blocks[0]?.hooks;
+      expect(Array.isArray(inner), `${hookName}[0].hooks should be an array`).toBe(true);
+      expect(inner).toHaveLength(1);
+      expect(inner?.[0]?.type).toBe("command");
+      expect(inner?.[0]?.command).toBe(HOOK_CMD);
     }
     expect(Object.keys(hooks)).toHaveLength(6);
   });
@@ -66,11 +69,12 @@ describe("writeFennecHooks", () => {
     expect(mode).toBe(0o644);
   });
 
-  it("ADDS fennec entries to an existing file without removing other tools' entries (D-20)", () => {
-    // Pre-seed a managed-settings file with another tool's hook entry
+  it("ADDS fennec block to an existing file without removing other tools' blocks (D-20)", () => {
+    // Pre-seed a managed-settings file with another tool's hook block
+    // (nested form — matches Claude Code's actual schema).
     const preExisting = {
       hooks: {
-        UserPromptSubmit: [{ type: "command", command: OTHER_TOOL_CMD }],
+        UserPromptSubmit: [{ hooks: [{ type: "command", command: OTHER_TOOL_CMD }] }],
       },
     };
     writeFileSync(path, JSON.stringify(preExisting, null, 2), { mode: 0o644 });
@@ -78,15 +82,16 @@ describe("writeFennecHooks", () => {
     writeFennecHooks(path, HOOK_CMD, { skipChown: true });
 
     const data = JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
-    const hooks = data.hooks as Record<string, Array<{ type: string; command: string }>>;
-    // UserPromptSubmit has BOTH entries — other tool first, fennec second
+    const hooks = data.hooks as Record<string, Array<{ hooks: Array<{ type: string; command: string }> }>>;
+    // UserPromptSubmit now has BOTH blocks — other tool first, fennec second
     expect(hooks.UserPromptSubmit).toHaveLength(2);
-    expect(hooks.UserPromptSubmit?.find((e) => e.command === OTHER_TOOL_CMD)).toBeDefined();
-    expect(hooks.UserPromptSubmit?.find((e) => e.command === HOOK_CMD)).toBeDefined();
-    // Other 5 hooks have only fennec's entry
+    const allCommands = hooks.UserPromptSubmit?.flatMap((b) => b.hooks.map((e) => e.command));
+    expect(allCommands).toContain(OTHER_TOOL_CMD);
+    expect(allCommands).toContain(HOOK_CMD);
+    // Other 5 hooks have only fennec's block
     for (const hookName of ALL_HOOK_NAMES.filter((h) => h !== "UserPromptSubmit")) {
       expect(hooks[hookName]).toHaveLength(1);
-      expect(hooks[hookName]?.[0]?.command).toBe(HOOK_CMD);
+      expect(hooks[hookName]?.[0]?.hooks?.[0]?.command).toBe(HOOK_CMD);
     }
   });
 
@@ -96,10 +101,11 @@ describe("writeFennecHooks", () => {
     writeFennecHooks(path, HOOK_CMD, { skipChown: true });
 
     const data = JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
-    const hooks = data.hooks as Record<string, Array<{ command: string }>>;
+    const hooks = data.hooks as Record<string, Array<{ hooks: Array<{ command: string }> }>>;
     for (const hookName of ALL_HOOK_NAMES) {
       expect(hooks[hookName]).toHaveLength(1);
-      expect(hooks[hookName]?.[0]?.command).toBe(HOOK_CMD);
+      expect(hooks[hookName]?.[0]?.hooks).toHaveLength(1);
+      expect(hooks[hookName]?.[0]?.hooks?.[0]?.command).toBe(HOOK_CMD);
     }
   });
 

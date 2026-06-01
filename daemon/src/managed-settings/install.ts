@@ -50,15 +50,35 @@ export const ALL_HOOK_NAMES = [
 ] as const;
 export type HookName = (typeof ALL_HOOK_NAMES)[number];
 
-/** A single hook-entry array element matching Claude Code's schema. */
+/**
+ * A single hook-entry element matching Claude Code's schema. Each entry
+ * inside a HookBlock's `hooks` array.
+ */
 interface HookEntry {
   type: "command";
   command: string;
 }
 
+/**
+ * A hook block — the outer wrapper Claude Code expects under
+ * `hooks.<EventName>[]`. The optional `matcher` field narrows the block
+ * to a specific tool (e.g. "Bash") for PostToolUse hooks; fennec uses
+ * the matcher-less form so the inner `hooks` array fires for every
+ * matching event.
+ *
+ * Schema reference: synapse's `HookBlock` (`synapse/mcp/src/cli/init.ts`)
+ * + the user's actual `~/.claude/settings.json` shape. Claude Code's
+ * documented schema is `hooks.<EventName>: HookBlock[]`, where each
+ * block has its own inner `hooks: HookEntry[]`.
+ */
+interface HookBlock {
+  matcher?: string;
+  hooks: HookEntry[];
+}
+
 /** Shape of the managed-settings.json file Claude Code reads. */
 interface ManagedSettings {
-  hooks?: Partial<Record<string, HookEntry[]>>;
+  hooks?: Partial<Record<string, HookBlock[]>>;
   // Other top-level keys (e.g. apiEndpoints) are preserved verbatim.
   [key: string]: unknown;
 }
@@ -116,23 +136,27 @@ export function writeFennecHooks(path: string, hookCommand: string, opts: WriteF
   if (data.hooks === undefined) {
     data.hooks = {};
   }
-  const hooks = data.hooks as Record<string, HookEntry[]>;
+  const hooks = data.hooks as Record<string, HookBlock[]>;
 
-  // 4. For each of the 6 D-22 hooks, ensure the array exists, then
-  //    add fennec's entry if not already present. The match key is
-  //    the command path — if some other tool happens to use the same
-  //    fennec-hook path, that's a collision the operator must resolve.
+  // 4. For each of the 6 D-22 hooks, ensure the block array exists,
+  //    then add a fennec HookBlock if no existing block already
+  //    contains our command. The match key is the command string;
+  //    if it's already present anywhere in any block's inner `hooks`
+  //    array, skip — that's the idempotence contract.
   for (const hookName of ALL_HOOK_NAMES) {
     if (!Array.isArray(hooks[hookName])) {
       hooks[hookName] = [];
     }
-    const arr = hooks[hookName];
-    if (!arr) continue;
-    if (arr.some((entry) => entry?.command === hookCommand)) {
-      // Idempotent — entry already present, skip
+    const blocks = hooks[hookName];
+    if (!blocks) continue;
+    const alreadyPresent = blocks.some((block) =>
+      Array.isArray(block?.hooks) ? block.hooks.some((entry) => entry?.command === hookCommand) : false,
+    );
+    if (alreadyPresent) {
+      // Idempotent — fennec entry already present, skip
       continue;
     }
-    arr.push({ type: "command", command: hookCommand });
+    blocks.push({ hooks: [{ type: "command", command: hookCommand }] });
   }
 
   // 5. Write back with 2-space indent (Pitfall 7), mode 0o644.

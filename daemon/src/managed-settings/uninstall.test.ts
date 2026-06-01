@@ -41,14 +41,15 @@ describe("removeFennecHooks", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it("removes ONLY fennec entries — preserves another tool's entries (D-24 surgical)", () => {
+  it("removes ONLY fennec entries — preserves another tool's blocks (D-24 surgical)", () => {
     const data = {
       hooks: {
+        // Two separate blocks: one for OTHER_TOOL, one for fennec
         UserPromptSubmit: [
-          { type: "command", command: OTHER_TOOL_CMD },
-          { type: "command", command: HOOK_CMD },
+          { hooks: [{ type: "command", command: OTHER_TOOL_CMD }] },
+          { hooks: [{ type: "command", command: HOOK_CMD }] },
         ],
-        PostToolUse: [{ type: "command", command: HOOK_CMD }],
+        PostToolUse: [{ hooks: [{ type: "command", command: HOOK_CMD }] }],
       },
     };
     writeFileSync(path, JSON.stringify(data, null, 2), { mode: 0o644 });
@@ -56,24 +57,25 @@ describe("removeFennecHooks", () => {
     removeFennecHooks(path, HOOK_CMD);
 
     const result = JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
-    const hooks = result.hooks as Record<string, Array<{ command: string }>>;
-    // UserPromptSubmit still has the other-tool entry
+    const hooks = result.hooks as Record<string, Array<{ hooks: Array<{ command: string }> }>>;
+    // UserPromptSubmit still has the OTHER_TOOL block (fennec block dropped)
     expect(hooks.UserPromptSubmit).toHaveLength(1);
-    expect(hooks.UserPromptSubmit?.[0]?.command).toBe(OTHER_TOOL_CMD);
-    // PostToolUse is gone entirely (only had fennec → array empty → removed)
+    expect(hooks.UserPromptSubmit?.[0]?.hooks?.[0]?.command).toBe(OTHER_TOOL_CMD);
+    // PostToolUse is gone entirely (only had fennec block → all blocks dropped)
     expect(hooks.PostToolUse).toBeUndefined();
   });
 
   it("UNLINKS the file when all entries removed and no other top-level keys remain", () => {
-    // Pre-existing file containing ONLY fennec entries (all 6 hooks)
+    // Pre-existing file containing ONLY fennec blocks (all 6 hooks)
+    const fennecBlock = { hooks: [{ type: "command", command: HOOK_CMD }] };
     const data = {
       hooks: {
-        UserPromptSubmit: [{ type: "command", command: HOOK_CMD }],
-        PostToolUse: [{ type: "command", command: HOOK_CMD }],
-        SessionStart: [{ type: "command", command: HOOK_CMD }],
-        SessionEnd: [{ type: "command", command: HOOK_CMD }],
-        PreCompact: [{ type: "command", command: HOOK_CMD }],
-        SubagentStop: [{ type: "command", command: HOOK_CMD }],
+        UserPromptSubmit: [fennecBlock],
+        PostToolUse: [fennecBlock],
+        SessionStart: [fennecBlock],
+        SessionEnd: [fennecBlock],
+        PreCompact: [fennecBlock],
+        SubagentStop: [fennecBlock],
       },
     };
     writeFileSync(path, JSON.stringify(data, null, 2), { mode: 0o644 });
@@ -86,7 +88,7 @@ describe("removeFennecHooks", () => {
   it("KEEPS the file when another top-level key remains, even if all hooks were fennec's", () => {
     const data = {
       hooks: {
-        UserPromptSubmit: [{ type: "command", command: HOOK_CMD }],
+        UserPromptSubmit: [{ hooks: [{ type: "command", command: HOOK_CMD }] }],
       },
       apiEndpoints: { "claude-code": "https://api.anthropic.com" },
     };
@@ -97,13 +99,14 @@ describe("removeFennecHooks", () => {
     expect(existsSync(path)).toBe(true);
     const result = JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
     expect(result.apiEndpoints).toEqual({ "claude-code": "https://api.anthropic.com" });
-    // hooks should be present but with empty content (or absent), no fennec entries
+    // hooks should be absent or empty — no fennec command anywhere
     const hooks = result.hooks as Record<string, unknown> | undefined;
     if (hooks) {
       for (const key of Object.keys(hooks)) {
-        const arr = hooks[key] as Array<{ command: string }> | undefined;
-        if (arr) {
-          expect(arr.find((e) => e.command === HOOK_CMD)).toBeUndefined();
+        const blocks = hooks[key] as Array<{ hooks?: Array<{ command: string }> }> | undefined;
+        if (Array.isArray(blocks)) {
+          const allCommands = blocks.flatMap((b) => b.hooks?.map((h) => h.command) ?? []);
+          expect(allCommands).not.toContain(HOOK_CMD);
         }
       }
     }
@@ -134,7 +137,7 @@ describe("removeFennecHooks", () => {
       JSON.stringify(
         {
           hooks: {
-            UserPromptSubmit: [{ type: "command", command: HOOK_CMD }],
+            UserPromptSubmit: [{ hooks: [{ type: "command", command: HOOK_CMD }] }],
           },
         },
         null,
@@ -153,8 +156,8 @@ describe("removeFennecHooks", () => {
     const data = {
       hooks: {
         UserPromptSubmit: [
-          { type: "command", command: OTHER_TOOL_CMD },
-          { type: "command", command: HOOK_CMD },
+          { hooks: [{ type: "command", command: OTHER_TOOL_CMD }] },
+          { hooks: [{ type: "command", command: HOOK_CMD }] },
         ],
       },
     };
@@ -166,13 +169,19 @@ describe("removeFennecHooks", () => {
     expect(raw).toMatch(/^\{\n {2}"hooks": \{/);
   });
 
-  it("only filters entries whose command field matches; other entries with different type/command are preserved", () => {
+  it("strips fennec entries from a block that ALSO contains another tool's entry, preserves the survivor", () => {
+    // Edge case: a single block with TWO inner entries — one fennec, one other.
+    // The fennec entry is removed; the surviving block keeps the other entry.
     const data = {
       hooks: {
         UserPromptSubmit: [
-          { type: "command", command: HOOK_CMD },
-          { type: "command", command: OTHER_TOOL_CMD },
-          { type: "command", command: "/some/third/tool" },
+          {
+            hooks: [
+              { type: "command", command: HOOK_CMD },
+              { type: "command", command: OTHER_TOOL_CMD },
+              { type: "command", command: "/some/third/tool" },
+            ],
+          },
         ],
       },
     };
@@ -181,8 +190,9 @@ describe("removeFennecHooks", () => {
     removeFennecHooks(path, HOOK_CMD);
 
     const result = JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
-    const hooks = result.hooks as Record<string, Array<{ command: string }>>;
-    expect(hooks.UserPromptSubmit).toHaveLength(2);
-    expect(hooks.UserPromptSubmit?.map((e) => e.command)).toEqual([OTHER_TOOL_CMD, "/some/third/tool"]);
+    const hooks = result.hooks as Record<string, Array<{ hooks: Array<{ command: string }> }>>;
+    expect(hooks.UserPromptSubmit).toHaveLength(1);
+    expect(hooks.UserPromptSubmit?.[0]?.hooks).toHaveLength(2);
+    expect(hooks.UserPromptSubmit?.[0]?.hooks?.map((e) => e.command)).toEqual([OTHER_TOOL_CMD, "/some/third/tool"]);
   });
 });

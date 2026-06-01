@@ -12,7 +12,18 @@ import { defineConfig } from "vitest/config";
  */
 export default defineConfig({
   test: {
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.wrangler/**", "**/tests/e2e/**", "**/tests/manual/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.wrangler/**",
+      "**/tests/e2e/**",
+      "**/tests/manual/**",
+      // Built installer payload is a compiled snapshot — its `.test.js`
+      // files are stale copies of the source-tree tests with broken
+      // relative paths (they expect to live under daemon/ not under
+      // installer/build/payload/.../daemon/).
+      "**/installer/build/**",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

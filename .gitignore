@@ -20,6 +20,9 @@ test-results/
 .env
 .env.local
 .env.*.local
+# Wrangler local-dev secrets (stub OAuth ids for local backend boot)
+.dev.vars
+**/.dev.vars
 
 # Logs
 *.log

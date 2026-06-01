@@ -33,12 +33,24 @@
 {
   "name": "fennec-backend",
   "main": "src/index.ts",
-  "compatibility_date": "2026-05-31",
+  "compatibility_date": "2026-05-27",
   "compatibility_flags": ["nodejs_compat"],
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "PLACEHOLDER_RUN_wrangler_hyperdrive_create"
+      // PRODUCTION: replace with the id printed by
+      //   `wrangler hyperdrive create fennec-supabase --connection-string=<supabase-direct-url>`
+      "id": "PLACEHOLDER_RUN_wrangler_hyperdrive_create",
+      // LOCAL DEV: `wrangler dev` (local mode) emulates Hyperdrive by
+      // connecting directly to this Postgres URL. Override per-developer
+      // via `WRANGLER_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` env
+      // var if you want to point at a different local Postgres.
+      // The default points at Homebrew Postgres 17 + the seeded
+      // fennec_local database (see scripts/local-postgres-bootstrap.sh).
+      // Miniflare requires a password in the URL even when the server
+      // uses trust auth; "local" is a placeholder password that's
+      // ignored by the actual Postgres trust auth.
+      "localConnectionString": "postgresql://Tanmai.N:local@127.0.0.1:5432/fennec_local"
     }
   ],
   "kv_namespaces": [
