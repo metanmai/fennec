@@ -132,7 +132,10 @@ export async function runDaemon(opts: RunDaemonOptions = {}): Promise<DaemonHand
   // 3. Shim-secret — null if pre-enrollment; we still boot but the
   // bridge will reject every POST (every shim send will 401 until the
   // wizard runs).
-  const shimSecretPath = opts.shimSecretPath ?? DEFAULT_SHIM_SECRET_PATH;
+  //
+  // Path resolution: explicit opts override > FENNEC_SHIM_SECRET_PATH
+  // env var (local dev) > canonical /etc/fennec/shim-secret.
+  const shimSecretPath = opts.shimSecretPath ?? process.env.FENNEC_SHIM_SECRET_PATH ?? DEFAULT_SHIM_SECRET_PATH;
   let shimSecret = readShimSecret({ shimSecretPath });
   if (!shimSecret) {
     log.warn(
@@ -176,9 +179,26 @@ export async function runDaemon(opts: RunDaemonOptions = {}): Promise<DaemonHand
 
   // 9. Sync loop — every iteration re-reads the api_key (Pitfall 10:
   // never cache; re-check 0o400+uid=0 on every read).
+  //
+  // Path resolution: FENNEC_API_KEY_PATH env var (local dev) overrides
+  // the canonical /var/db/fennec/key. When the override path is set
+  // we also skip the root-owner permission check — local-dev runs as a
+  // non-root user and the canonical 0o400/uid=0 enforcement is the
+  // safety net for the production LaunchDaemon path, not the dev path.
+  const apiKeyOverridePath = process.env.FENNEC_API_KEY_PATH;
+  const skipApiKeyPermCheck = apiKeyOverridePath !== undefined;
+  if (skipApiKeyPermCheck) {
+    log.warn(
+      `FENNEC_API_KEY_PATH=${apiKeyOverridePath} set; api_key 0o400/uid=0 permission check DISABLED (local-dev mode)`,
+      undefined,
+    );
+  }
   const apiKeyProvider = async (): Promise<string | null> => {
     try {
-      return readApiKey(os);
+      return readApiKey(os, {
+        ...(apiKeyOverridePath ? { overridePath: apiKeyOverridePath } : {}),
+        ...(skipApiKeyPermCheck ? { skipPermissionCheck: true } : {}),
+      });
     } catch (err) {
       // ENOENT → pre-enrollment; permission drift → operator must
       // intervene. Either way, return null and let the loop defer.

@@ -203,6 +203,89 @@ describe("runDaemon orchestration", () => {
     }
   });
 
+  it("reads shim-secret from FENNEC_SHIM_SECRET_PATH env var when opts override absent", async () => {
+    const log = { info: vi.fn(), warn: vi.fn() };
+    const envVarPath = join(tmpRoot, "env-var-shim-secret");
+    const envVarSecret = "env-var-shim-secret-1234567890abcdef";
+    writeFileSync(envVarPath, envVarSecret, { encoding: "utf-8" });
+
+    const prevEnv = process.env.FENNEC_SHIM_SECRET_PATH;
+    process.env.FENNEC_SHIM_SECRET_PATH = envVarPath;
+    let handle: Awaited<ReturnType<typeof runDaemon>>;
+    try {
+      handle = await runDaemon({
+        envOverride: env,
+        // No `shimSecretPath` opt — should fall back to env var
+        port: 0,
+        installSignalHandlers: false,
+        hostnameOverride: "test-host",
+        machineIdOverride: "44444444-4444-4444-4444-444444444444",
+        log,
+      });
+    } finally {
+      if (prevEnv === undefined) delete process.env.FENNEC_SHIM_SECRET_PATH;
+      else process.env.FENNEC_SHIM_SECRET_PATH = prevEnv;
+    }
+
+    try {
+      const addr = handle.bridgeAddress();
+      if (!addr) throw new Error("bridge has no address");
+      const res = await fetch(`http://${addr.host}:${addr.port}/v1/hook`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Fennec-Shim-Secret": envVarSecret,
+        },
+        body: JSON.stringify({
+          hook_event_name: "UserPromptSubmit",
+          session_id: "env-var-test",
+          cwd: "/tmp",
+          prompt: "from env-var-loaded secret",
+        }),
+      });
+      expect(res.status).toBe(202);
+    } finally {
+      await handle.shutdown();
+      await handle.done;
+    }
+  });
+
+  it("reads api-key from FENNEC_API_KEY_PATH env var and skips perm check (local-dev mode)", async () => {
+    const log = { info: vi.fn(), warn: vi.fn() };
+    const apiKeyPath = join(tmpRoot, "local-api-key");
+    // Write WITHOUT mode 0o400 so we can prove the perm-check skip is
+    // active — the canonical readApiKey would throw on a non-0o400 file.
+    writeFileSync(apiKeyPath, "fennec_local_dev_api_key_xyz", { encoding: "utf-8", mode: 0o644 });
+
+    const prevApiKey = process.env.FENNEC_API_KEY_PATH;
+    process.env.FENNEC_API_KEY_PATH = apiKeyPath;
+    let handle: Awaited<ReturnType<typeof runDaemon>>;
+    try {
+      handle = await runDaemon({
+        envOverride: env,
+        shimSecretPath,
+        port: 0,
+        installSignalHandlers: false,
+        hostnameOverride: "test-host",
+        machineIdOverride: "55555555-5555-5555-5555-555555555555",
+        log,
+      });
+    } finally {
+      if (prevApiKey === undefined) delete process.env.FENNEC_API_KEY_PATH;
+      else process.env.FENNEC_API_KEY_PATH = prevApiKey;
+    }
+
+    try {
+      // Warn log must have surfaced the local-dev mode disabling perm check.
+      const warnMsgs = log.warn.mock.calls.map((c) => c[0] as string);
+      expect(warnMsgs.some((m) => m.includes("permission check DISABLED"))).toBe(true);
+      expect(warnMsgs.some((m) => m.includes("local-dev mode"))).toBe(true);
+    } finally {
+      await handle.shutdown();
+      await handle.done;
+    }
+  });
+
   it("invokes shutdown via an injected shutdownSignal promise", async () => {
     const log = { info: vi.fn(), warn: vi.fn() };
     let triggerShutdown: () => void = () => {};
