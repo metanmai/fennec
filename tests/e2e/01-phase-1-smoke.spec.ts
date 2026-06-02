@@ -140,7 +140,8 @@ async function pollForRow(env: SmokeEnv, opts: SupabasePollOptions): Promise<Rec
     const res = await fetch(url, { headers });
     if (res.ok) {
       const rows = (await res.json()) as Record<string, unknown>[];
-      if (rows.length > 0) return rows[0]!;
+      const first = rows[0];
+      if (first !== undefined) return first;
     }
     await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
   }

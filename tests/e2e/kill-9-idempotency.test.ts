@@ -123,7 +123,7 @@ describe("ROADMAP criterion 6 — kill -9 idempotency (local, no infra)", () => 
 
     // Simulate: daemon successfully shipped + acknowledged the
     // first 2 events. Watermark advances to event #2's key.
-    advanceWatermark(watermarkPath, events[1]!.idempotency_key);
+    advanceWatermark(watermarkPath, events[1]?.idempotency_key);
 
     // Now simulate kill -9 during ship of events 3-5. On restart
     // the daemon calls replayFromWatermark, which skips events 1-2
@@ -137,9 +137,9 @@ describe("ROADMAP criterion 6 — kill -9 idempotency (local, no infra)", () => 
 
     expect(replay.length).toBe(3);
     expect(replay.map((e) => e.idempotency_key)).toEqual([
-      events[2]!.idempotency_key,
-      events[3]!.idempotency_key,
-      events[4]!.idempotency_key,
+      events[2]?.idempotency_key,
+      events[3]?.idempotency_key,
+      events[4]?.idempotency_key,
     ]);
   });
 

@@ -53,7 +53,7 @@ export function getMachineId(os: "darwin" | "linux" | "win32"): string {
     // Extract IOPlatformUUID — the line looks like:
     //   "IOPlatformUUID" = "12345678-1234-5678-1234-567812345678"
     const match = output.match(/"IOPlatformUUID"\s*=\s*"([^"]+)"/);
-    if (!match || !match[1]) {
+    if (!match?.[1]) {
       throw new Error("machine_id_resolution_failed: IOPlatformUUID not found in ioreg output");
     }
     cached = match[1];

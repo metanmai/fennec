@@ -9,7 +9,8 @@
       "!**/coverage",
       "!**/*.tsbuildinfo",
       "!**/.husky/_",
-      "!**/package-lock.json"
+      "!**/package-lock.json",
+      "!installer/build"
     ]
   },
   "linter": {
