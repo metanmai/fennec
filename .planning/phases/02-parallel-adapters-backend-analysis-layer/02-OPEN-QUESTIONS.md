@@ -1,7 +1,7 @@
 ---
 phase: 02-parallel-adapters-backend-analysis-layer
 updated: 2026-07-01T00:00:00Z
-open_count: 13
+open_count: 18
 ---
 
 # Open Questions — Phase 2 Parallel Adapters + Backend Analysis Layer
@@ -127,3 +127,42 @@ open_count: 13
 - **Why uncertain:** The Phase 1 ingest path currently writes `ai_events` only; the git-watcher (D2-06) emits `git_events`. RESEARCH (A4) flags this as a real architectural fork the planner must resolve, not a settled CONTEXT decision.
 - **Impact:** Determines ingest branching + whether a second endpoint exists. Affects the hot-path-purity test surface. Contained either way.
 - **Confidence:** MEDIUM. Planner decides; either path is testable.
+
+---
+
+> Q14–Q18 appended 2026-07-01 by claim-validation pass 1 (02-EVIDENCE.md). These are claims marked UNVERIFIABLE in the ledger — could not be validated in this environment; assumed-true with a safe default, verify on return. Several overlap existing Q8/Q11/Q12 but are recorded here as explicit "could-not-validate" entries per the validation protocol.
+
+## Q14 — Cloudflare "one push consumer per queue" limit (EVIDENCE C36 — UNVERIFIABLE)
+
+- **Claim:** A Cloudflare Queue allows only ONE active push consumer; two push-consumer Workers on the same queue fail at publish (refines D2-14).
+- **Could not validate:** This is an account/deploy-time platform limit. Local `wrangler 4.93.1 deploy --dry-run` with two consumers on one queue did NOT reject at config validation — the limit is enforced server-side at `wrangler deploy`, which needs a live Cloudflare account (out of scope here).
+- **Assumed true** (documented Cloudflare limit, RESEARCH C7.4). **Safe default:** Option A — ONE queue + ONE consumer Worker running correlation + model-fit as two idempotent functions. This honors the limit regardless and is simpler/cheaper. Verify by an actual `wrangler deploy` to staging during the build.
+- **Confidence:** MEDIUM (well-documented limit; just not locally confirmable).
+
+## Q15 — Live per-token pricing (Claude + GPT) at build time (EVIDENCE C37/C38 — UNVERIFIABLE; see also Q12)
+
+- **Claim:** The 2026-07-01 seed per-MTok prices in RESEARCH C11.2/C11.3 (Opus 4.8 $5/$25; Sonnet 5 $2/$10 intro → $3/$15 from 2026-09-01; Haiku 4.5 $1/$5; GPT-5.5 $5/$30; GPT-4.1 $2/$8; GPT-4o $2.50/$10; nano $0.10).
+- **Could not validate:** External, paid-vendor pricing pages; no live web fetch performed; volatile (research valid ~1 week for pricing).
+- **Assumed true** as the seed. **Safe default:** seed `model_pricing` via the effective-date table (so prices are data, not code — corrections are INSERTs); re-verify all numbers at build. Seed BOTH Sonnet-5 rows around the 2026-08-31→09-01 cutover (the EXCLUDE machinery is PROVEN, C16 — this exercises it live).
+- **Confidence:** MEDIUM. Re-verify at build.
+
+## Q16 — Staging Supabase Postgres version + btree_gist availability (EVIDENCE C17 — partial; see also Q11)
+
+- **Claim:** Staging Postgres permits `CREATE EXTENSION btree_gist` and is < 18 (so the EXCLUDE form, not `WITHOUT OVERLAPS`).
+- **Could not validate:** Only the LOCAL dev Postgres was reachable (PostgreSQL 17.10 — EXCLUDE proven there, C16). The staging Supabase instance needs production credentials (out of scope).
+- **Assumed true** (Supabase generally allows btree_gist; Phase 1 targets PG15+). **Safe default:** use the EXCLUDE-constraint form (proven on PG 17.10); if staging is ≥18, `WITHOUT OVERLAPS` is an optional cleaner alternative. Confirm the staging version at build.
+- **Confidence:** MEDIUM.
+
+## Q17 — MV3 monkeypatch viability on live ChatGPT/Claude.ai (EVIDENCE C39 — UNVERIFIABLE; duplicate of Q8)
+
+- **Claim:** `world:MAIN`+`document_start` `fetch`/`XHR` monkeypatch fires on live ChatGPT.com + Claude.ai completions without anti-bot breakage; current completion request URL shapes.
+- **Could not validate:** Requires a live browser session against late-2026 sites + observing anti-bot behavior; no live POC performed (same as Q8).
+- **Assumed best-effort.** **Safe default:** build-and-exercise-locally against the loopback bridge (D2-11); take the documented-defer escape hatch at v1-freeze (Q2) if detection/anti-bot breaks. Architecture built either way.
+- **Confidence:** LOW. (Tracked primarily under Q8.)
+
+## Q18 — Gemini live transcript schema + token field (EVIDENCE C40 — UNVERIFIABLE-here; duplicate of Q9)
+
+- **Claim:** Live `~/.gemini/tmp/<project>/chats/session-*.jsonl` filename + whether it persists per-turn token usage.
+- **Could not validate:** The `tmp/<project>/` dirs exist but contain zero `*.jsonl` right now (chats are ephemeral / aged out). Could not observe the live schema or token field this session.
+- **Assumed:** Gemini transcripts may lack reliable per-turn tokens — cost worker nulls them (graceful degradation, like Copilot). **Safe default:** run a live `gemini` prompt at build and inspect the JSONL (Q9).
+- **Confidence:** LOW. (Tracked primarily under Q9; the ephemerality risk is CONFIRMED.)
