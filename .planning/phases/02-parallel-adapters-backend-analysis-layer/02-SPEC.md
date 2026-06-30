@@ -115,9 +115,9 @@ Phase 1 decision constraints carried in: D-16/D-27 removed `fennec pause` (CAP-1
     - Target: A `model_pricing` table stores per-model token prices with `effective_from`/`effective_to` ranges; the cost calculation in the aggregator reads the price effective at each event's `occurred_at`.
     - Acceptance: Inserting two price rows for the same model with non-overlapping date ranges causes events before and after the cutover to be costed at the respective prices; no price constant is hardcoded in the worker source (grep check).
 
-16. **Subscription products accounted separately (ANL-09)**: Subscription products (Copilot $19/mo, ChatGPT Pro $20/mo) are accounted for separately from per-token spend.
+16. **Subscription products accounted separately (ANL-09)**: Subscription products (e.g. GitHub Copilot Pro ~$10/mo; ChatGPT **Plus** $20/mo) are accounted for separately from per-token spend. (Note: Copilot Pro moved to usage-based/credit billing on 2026-06-01, so a flat subscription line is a deliberate simplification; ChatGPT **Pro** is the $200/mo tier — the $20/mo figure is ChatGPT Plus. These live prices are volatile — re-verify subscription prices at build time, see OPEN-QUESTIONS Q12/Q15.)
     - Current: No subscription cost accounting exists.
-    - Target: Subscription-priced products are represented as fixed-period subscription costs (in `model_pricing` or a sibling structure) and surfaced in rollups as a separate line from per-token spend.
+    - Target: Subscription-priced products are represented as fixed-period subscription costs held as SEED DATA in the `model_pricing` effective-date table (ANL-08) — never hardcoded constants — and surfaced in rollups as a separate line from per-token spend.
     - Acceptance: A rollup that includes Copilot and/or ChatGPT-web usage shows the subscription cost as a distinct field from per-token `cost_estimated`; a test confirms subscription cost is not summed into the per-token estimate.
 
 ## Boundaries
@@ -172,7 +172,7 @@ Phase 1 decision constraints carried in: D-16/D-27 removed `fennec pause` (CAP-1
 - [ ] The daily aggregator cron writes `daily_rollups_by_user` and `daily_rollups_by_project` rows whose totals reconcile with a direct raw-event query for that day.
 - [ ] Rollups carry separate `cost_estimated` and `cost_billed` columns; the estimate uses cache-creation and cache-read tokens as distinct line items.
 - [ ] Pricing is read from a `model_pricing` table with effective-date ranges; no price constant is hardcoded in worker source.
-- [ ] Subscription products (Copilot, ChatGPT Pro) appear as a cost line separate from per-token `cost_estimated`.
+- [ ] Subscription products (Copilot Pro ~$10/mo; ChatGPT Plus $20/mo) appear as a cost line separate from per-token `cost_estimated`, held as seed data in the `model_pricing` effective-date table (re-verify prices at build, see OPEN-QUESTIONS Q12/Q15).
 - [ ] Every new analysis table has `org_id` and an RLS policy from its creation migration.
 
 ## Ambiguity Report
