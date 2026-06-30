@@ -1,7 +1,7 @@
 ---
 phase: 02-parallel-adapters-backend-analysis-layer
 updated: 2026-07-01T00:00:00Z
-open_count: 7
+open_count: 13
 ---
 
 # Open Questions — Phase 2 Parallel Adapters + Backend Analysis Layer
@@ -75,3 +75,55 @@ open_count: 7
 - **Why uncertain:** Both satisfy the SPEC acceptance; it's a schema-ergonomics taste call with no prior fennec precedent. Migrating between the two later is a contained migration.
 - **Impact:** Schema shape of the pricing layer; the rollup's separate `cost_subscription` field is unaffected by the choice.
 - **Confidence:** MEDIUM (requirement STRONG/locked; table shape is the open part).
+
+---
+
+> Q8–Q13 appended 2026-07-01 by `/gsd:plan-phase --research-phase 2` (research-only mode, autonomous). These are the LOW/MEDIUM-confidence, externally-dependent items surfaced in `02-RESEARCH.md` that the planner should schedule explicit build-time verify tasks for. Several REFINE the locked CONTEXT decisions (D2-04/D2-14/D2-27) — see notes.
+
+## Q8 — Browser MV3 capture viability against late-2026 ChatGPT.com + Claude.ai (gates Q2)
+
+- **Question:** Does the `world: MAIN` + `run_at: document_start` content-script `window.fetch` / `XMLHttpRequest.prototype.send` monkeypatch still fire on live ChatGPT.com and Claude.ai chat completions, without anti-bot detection breaking the session or detecting the patch? What are the current completion request URL/method shapes per site so the content script knows what to capture?
+- **Tentative choice:** Build a minimal raw-MV3 extension and exercise it against the daemon loopback bridge this phase (per D2-11); treat live capture as best-effort. If the monkeypatch is detected or the request shapes can't be reliably captured, take the documented-defer escape hatch at v1-freeze (Q2) with the loopback architecture intact.
+- **Why uncertain:** No live POC was performed in research; CLAUDE.md rates this MEDIUM and explicitly expects revisit mid-build. Anti-bot behaviour and request URLs are version-fragile and external.
+- **Impact:** Directly gates the CAP-07/08 GA-vs-defer decision (Q2). Architecture is built either way, so deferral is structurally free.
+- **Confidence:** LOW. Verify at build time with a throwaway extension on the real sites.
+
+## Q9 — Gemini CLI per-turn token persistence
+
+- **Question:** Does `~/.gemini/tmp/<project>/chats/session-*.jsonl` (or the current Gemini transcript location) persist any per-turn token/usage field, or are token counts unavailable for the Gemini surface?
+- **Tentative choice:** Assume Gemini transcripts may lack reliable per-turn token usage; the cost worker nulls tokens for Gemini rows when absent (graceful degradation, mirroring the Copilot no-token case).
+- **Why uncertain:** Research could not re-observe a live Gemini session schema (ephemeral / aged-out files); path verified, token field not confirmed.
+- **Impact:** Affects whether Gemini events carry a `cost_estimated` or null tokens. Reversible — a normaliser field-presence check.
+- **Confidence:** LOW. Run a live `gemini` prompt at build time and inspect the JSONL.
+
+## Q10 — Cursor WAL change-detection + `node:sqlite` flag-gating
+
+- **Question:** Does a new Cursor prompt bump the mtime of `state.vscdb` (or `state.vscdb-wal`) within the adapter's chokidar poll window, so the watcher fires? And does Node 22's built-in `node:sqlite` `DatabaseSync(path, { readOnly: true })` require an `--experimental-sqlite` flag on the pinned Node 22 minor?
+- **Tentative choice:** Poll on a chokidar mtime watch of both `state.vscdb` and `state.vscdb-wal`; open read-only via `node:sqlite` (RESEARCH confirmed a live read-only open worked against the WAL DB on Node 22.23.1 this machine). If a flag is required on the pinned minor, gate it in the daemon launch.
+- **Why uncertain:** WAL writes may land in the `-wal` sidecar without bumping the main DB mtime promptly; the `node:sqlite` flag requirement varies by Node 22 minor.
+- **Impact:** Wrong watch target = missed Cursor captures (heartbeat still fires, so failure is visible). Reversible.
+- **Confidence:** MEDIUM. (Refines D2-04/Q4 — the read mechanism is now RESOLVED to `node:sqlite` read-only; only change-detection + flag-gating remain to verify.)
+
+## Q11 — Supabase Postgres version + `btree_gist` for the non-overlap pricing constraint
+
+- **Question:** What Postgres version does the staging Supabase run, and is `CREATE EXTENSION btree_gist` permitted (needed for the `EXCLUDE USING gist` non-overlapping-effective-date constraint on `model_pricing`)?
+- **Tentative choice:** Use `CREATE EXTENSION IF NOT EXISTS btree_gist` + an `EXCLUDE USING gist (model WITH =, token_kind WITH =, tstzrange(effective_from, effective_to) WITH &&)` constraint (Supabase permits btree_gist). If PG ≥18 on staging, `WITHOUT OVERLAPS` is an alternative.
+- **Why uncertain:** Staging PG version not confirmed in research; the extension availability is Supabase-plan-dependent (though generally allowed).
+- **Impact:** Determines whether non-overlap is enforced by constraint (preferred) or by a test only. Reversible.
+- **Confidence:** MEDIUM. Confirm against staging at build time.
+
+## Q12 — Pricing currency + Copilot's usage-based billing model (refines D2-27/ANL-09)
+
+- **Question:** The verified 2026-07-01 seed prices differ from the SPEC: GitHub Copilot Pro is now **$10/mo** (and moved to usage-based/credit billing on 2026-06-01), not $19; ChatGPT **Plus** is $20/mo. How should Copilot's now-usage-based billing be represented as a fixed "subscription" line, and what are the current per-token Claude/GPT prices at build time?
+- **Tentative choice:** Seed `model_pricing` with the verified 2026-07-01 numbers via the `pricing_kind` discriminator (per RESEARCH recommendation favouring same-table over a sibling table — refines Q7); represent Copilot as a subscription line as a documented simplification, flagged that Copilot is really usage-based now. Re-verify all prices at build (volatile). Seed BOTH Sonnet 5 intro rows around the 2026-08-31→09-01 cutover as a live test of the effective-date machinery.
+- **Why uncertain:** Prices are volatile (research valid ~1 week for pricing); Copilot's usage-based shift makes a flat-subscription model an approximation.
+- **Impact:** Seed-data accuracy for `cost_estimated` and `cost_subscription`. Reversible — data rows, not code (the no-hardcoded-price constraint guarantees this).
+- **Confidence:** MEDIUM. Re-verify at build.
+
+## Q13 — Git event transport: standard ingest path vs separate git endpoint (genuine plan-time design decision)
+
+- **Question:** Should `tool: "git"` events route through the standard adapter → registry → JSONL queue → `POST /api/events/batch` ingest path and into `git_events` (requiring a dumb tool-branch in ingest that writes `git_events` instead of `ai_events`), or via a separate git endpoint/queue?
+- **Tentative choice:** Prefer routing through the existing ingest path with a dumb tool-discriminator branch (git → `git_events`, all other tools → `ai_events`), keeping one transport and preserving ING-04 hot-path purity. The correlation worker then reads `git_events` directly.
+- **Why uncertain:** The Phase 1 ingest path currently writes `ai_events` only; the git-watcher (D2-06) emits `git_events`. RESEARCH (A4) flags this as a real architectural fork the planner must resolve, not a settled CONTEXT decision.
+- **Impact:** Determines ingest branching + whether a second endpoint exists. Affects the hot-path-purity test surface. Contained either way.
+- **Confidence:** MEDIUM. Planner decides; either path is testable.
