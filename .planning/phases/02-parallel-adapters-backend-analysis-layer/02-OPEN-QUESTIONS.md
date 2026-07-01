@@ -1,7 +1,7 @@
 ---
 phase: 02-parallel-adapters-backend-analysis-layer
 updated: 2026-07-01T00:00:00Z
-open_count: 18
+open_count: 19
 ---
 
 # Open Questions — Phase 2 Parallel Adapters + Backend Analysis Layer
@@ -166,3 +166,16 @@ open_count: 18
 - **Could not validate:** The `tmp/<project>/` dirs exist but contain zero `*.jsonl` right now (chats are ephemeral / aged out). Could not observe the live schema or token field this session.
 - **Assumed:** Gemini transcripts may lack reliable per-turn tokens — cost worker nulls them (graceful degradation, like Copilot). **Safe default:** run a live `gemini` prompt at build and inspect the JSONL (Q9).
 - **Confidence:** LOW. (Tracked primarily under Q9; the ephemerality risk is CONFIRMED.)
+
+---
+
+> Q19 appended 2026-07-01 while authoring 02-10-PLAN.md (MV3 browser extension plan) unattended. A safe reversible default was applied so the plan could be written; revisit at execute time.
+
+## Q19 — Browser-extension workspace directory name: `browser-extension/` vs `extension/`
+
+- **Question:** 02-RESEARCH.md (§B.6) and 02-PATTERNS.md (§No Analog Found) name the MV3 browser workspace `extension/`, but the 02-10 plan-authoring directive named it `browser-extension/`. Which directory name does the workspace ship under?
+- **Tentative choice:** `browser-extension/` — used throughout 02-10-PLAN.md (files, must_haves, threat model, root-`workspaces` append). Chosen because (a) the plan-authoring directive is the most recent explicit instruction, and (b) `browser-extension/` is more self-documenting alongside the sibling `vscode-extension/` (02-09) — the two out-of-process capture clients read as a matched pair.
+- **Alternatives:** `extension/` (matches RESEARCH/PATTERNS prose; shorter). Either works — it is a directory name only, referenced nowhere in production runtime logic; the manifest, content-script, SW, and bridge-client are name-agnostic.
+- **Why uncertain:** Pure naming reconciliation between two design artifacts; no functional impact. The root `package.json` `workspaces` entry + any doc cross-refs must use the SAME name the plan ships.
+- **Impact:** Cosmetic/organisational. If the executor prefers `extension/` to match RESEARCH/PATTERNS, rename consistently across the workspace + root `workspaces` array — a contained find-replace, no logic change.
+- **Confidence:** HIGH (that either name works); the divergence is logged only so the executor picks ONE consistently.
