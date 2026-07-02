@@ -2,7 +2,7 @@
 phase: 02-parallel-adapters-backend-analysis-layer
 updated: 2026-07-01T00:00:00Z
 proven: 18
-static_validated: 17
+static_validated: 18
 refuted: 3
 unverifiable: 4
 unverified: 0
@@ -56,6 +56,7 @@ Pass 1 (design/research claims). POCs run in an isolated scratch dir outside the
 | C40 | Gemini CLI transcript path `~/.gemini/tmp/<project>/chats/session-*.jsonl` exists but is EPHEMERAL; per-turn token usage is not reliably persisted. | RESEARCH A2.1/A2.4 / Q9 | REFUTED (partial) → see Details | Path structure confirmed (`~/.gemini/tmp/{probe-gemini,zsh-pro}/` dirs exist) BUT zero `*.jsonl` present now (`find ~/.gemini -name '*.jsonl'` = 0). The "chats/session-*.jsonl" filename + token-presence claims could NOT be observed live this session — must run a live `gemini` prompt at build time (Q9). The ephemerality claim is CONFIRMED; the exact live schema/token-field is UNVERIFIABLE-here. |
 | C41 | Copilot Pro subscription = $10/mo (usage-based since 2026-06-01), NOT the $19 in the SPEC; ChatGPT Plus = $20/mo (SPEC's "ChatGPT Pro $20" conflates Plus/Pro). | RESEARCH C11.7 / Q12 / ANL-09 | REFUTED (of the SPEC figures) | The SPEC/CONTEXT figures ($19 Copilot, "ChatGPT Pro $20") are stale per RESEARCH C11.7. Correct (per research, 2026-07-01, volatile): Copilot Pro $10/mo + usage-based; ChatGPT Plus $20/mo. The live $10/$20 numbers are themselves UNVERIFIABLE here (external pricing pages) — re-verify at build. See Details + OPEN-QUESTIONS Q12. |
 | C42 | The Copilot `chatSessions` `modelId` is always present and formatted `github.copilot-chat/<model>`. | RESEARCH B5.2 (implied) | REFUTED (refined) | 98/99 requests have `modelId` (one null — likely canceled/in-flight) and the prefix is NOT uniform: observed `copilot/gpt-4.1`, `github.copilot-chat/gpt-4.1`, `copilot/claude-sonnet-4`. The normaliser MUST tolerate a missing `modelId` and multiple prefixes. |
+| C43 | A Cloudflare ES-module-worker default export `{ fetch, queue, scheduled }` with `queue(batch: MessageBatch, env, ctx): Promise<void>` and `scheduled(controller: ScheduledController, env, ctx): Promise<void>` typechecks against the pinned `@cloudflare/workers-types`; `MessageBatch`/`Message`/`ScheduledController`/`Queue` are exported types. | RESEARCH C7.3 / PATTERNS §queue-register / H12 | STATIC-VALIDATED | A minimal `export default { fetch: app.fetch, queue, scheduled } satisfies ExportedHandler<Env>` module with `MessageBatch<T>`/`ScheduledController` handler signatures compiles under `tsc --noEmit` against `@cloudflare/workers-types` (the version pinned in `backend/package.json`); the `queue`/`scheduled` members are recognized on `ExportedHandler`. The Plan 06 `module-worker.typecheck.test.ts` (and Plan 07's `scheduled` append) bind this by asserting `npm run typecheck` stays green with the handler object. NOTE: C15 proved only the wrangler config is valid; C43 covers the TypeScript handler contract distinctly (the H12 gap). |
 
 ## Details
 

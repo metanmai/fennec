@@ -23,7 +23,7 @@
 | `daemon/src/adapters/loopback-bridge/server.ts` (MODIFY) | middleware (ingress) | request-response | the existing `handleHookPost` in the same file | exact (self-analog) |
 | `daemon/src/adapters/bridge-events/adapter.ts` (copilot/chatgpt-web/claude-ai-web normaliser) | adapter | event-driven (bridge "events") | `daemon/src/adapters/claude-code/adapter.ts` | exact |
 | `vscode-extension/` (Copilot sidecar workspace) | component (out-of-process client) | file-I/O→HTTP POST | bridge POST shape (`server.ts`) + net-new vsce shell | partial |
-| `extension/` (MV3 browser workspace) | component (out-of-process client) | streaming capture→HTTP POST | bridge POST shape (`server.ts`) + net-new monkeypatch | partial (no in-repo analog) |
+| `browser-extension/` (MV3 browser workspace) | component (out-of-process client) | streaming capture→HTTP POST | bridge POST shape (`server.ts`) + net-new monkeypatch | partial (no in-repo analog) |
 | `daemon/src/cli/inspect.ts` | utility (CLI command) | batch (read JSONL) | `daemon/src/cli/daemon.ts` (runX shape) + `replayFromWatermark` consumer | role-match |
 | `daemon/src/index.ts` (MODIFY) | route (CLI dispatcher) | request-response | the `switch (sub)` block in the same file | exact (self-analog) |
 | `backend/wrangler.jsonc` (MODIFY) | config | n/a | the commented `queues` stub in the same file | exact (self-analog) |
@@ -257,7 +257,7 @@ Copilot payloads carry NO token counts (RESEARCH B5.3) — normaliser leaves `us
 
 ---
 
-### `extension/` (MV3 browser workspace) — NO IN-REPO ANALOG (highest risk; build LAST)
+### `browser-extension/` (MV3 browser workspace) — NO IN-REPO ANALOG (highest risk; build LAST)
 
 **Analog:** none in fennec; none in synapse (net-new per CLAUDE.md). The POST-to-bridge shape is the only reuse.
 
@@ -461,7 +461,7 @@ Files with no close in-repo match (planner uses RESEARCH.md §B.6 / §A.3 patter
 
 | File | Role | Data Flow | Reason |
 |------|------|-----------|--------|
-| `extension/` (MV3 browser content-script + SW) | component | streaming monkeypatch | No browser extension exists in fennec OR synapse; the fetch/XHR monkeypatch + `chrome.storage.local`/`chrome.alarms` buffer-flush is net-new (RESEARCH B6, CLAUDE.md). Only the POST-to-`/v1/events` shape is reused. Highest-risk surface; build LAST; defer-able at v1-freeze (Q2). |
+| `browser-extension/` (MV3 browser content-script + SW) | component | streaming monkeypatch | No browser extension exists in fennec OR synapse; the fetch/XHR monkeypatch + `chrome.storage.local`/`chrome.alarms` buffer-flush is net-new (RESEARCH B6, CLAUDE.md). Only the POST-to-`/v1/events` shape is reused. Highest-risk surface; build LAST; defer-able at v1-freeze (Q2). |
 | `daemon/src/adapters/cursor/` SQLite read | adapter | file-I/O (SQLite) | `node:sqlite` `DatabaseSync({readOnly:true})` has no in-repo precedent (daemon is zero-native-dep, no prior SQLite). synapse `cursor.ts` parses outdated per-workspace `.json` and must NOT be copied (RESEARCH A3.1/State-of-the-Art). The `Adapter`/normaliser SHAPE is analogous; the read mechanism is new. |
 
 **Partial-analog dependencies to add (RESEARCH Wave 0 / Environment Availability):**

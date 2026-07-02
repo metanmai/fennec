@@ -81,7 +81,30 @@ Plans:
   4. The daily aggregator cron writes `daily_rollups_by_user` and `daily_rollups_by_project` rows; cost is reported with separate "estimated" and "billed" columns, with cache-creation/cache-read tokens accounted separately and subscription products (Copilot, ChatGPT Pro) counted apart from per-token spend; pricing is read from a `model_pricing` table with effective-date ranges, not hardcoded.
   5. `fennec inspect` shows the developer every event captured locally in the last 24 hours with redactions visible (transparency surface — CAP-17 `pause` is removed per Phase 1 D-16).
 
-**Plans**: TBD
+**Plans**: 10 plans across 4 waves
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — chokidar dep + POST /v1/events bridge route + bridge-events adapter(s) + git→git_events ingest routing + @fennec/shared payload/analysis types (CAP-06/07/08/09)
+- [ ] 02-04-PLAN.md — Supabase migrations 008-014: prompt_outcomes, model_fit_scores, model_pricing (reference table), daily rollups + seed, ai_events repo/branch/cwd ALTER, rolling partitions; org_id+RLS (USING+WITH CHECK); [BLOCKING] db push (ANL-02/03/04/05/07/08/09 schema)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-02-PLAN.md — Codex + Gemini CLI transcript-watcher adapters, persisted tail offsets (CAP-03/04)
+- [ ] 02-03-PLAN.md — Cursor node:sqlite adapter + git-watcher adapter, persisted watermark/offsets (CAP-05/09)
+- [ ] 02-05-PLAN.md — `fennec inspect` transparency CLI (local queue read, redacted, canary-tested) (CAP-18)
+
+**Wave 3** *(blocked on Wave 1 + migrations)*
+
+- [ ] 02-06-PLAN.md — Cloudflare Queue wiring + one consumer running correlation + rule-based model-fit + DLQ consumer (interval confidence, revert-downgrade, no-LLM guard) (ANL-01/02/03/04)
+- [ ] 02-08-PLAN.md — Daemon wiring: register + start the five adapters (Codex/Gemini/Cursor/git in-process + BridgeEventsAdapter ingress) in `daemon/src/cli/daemon.ts` so live capture runs (CAP-03/04/05/06/09)
+- [ ] 02-09-PLAN.md — GitHub Copilot VS Code sidecar (vscode-extension/) reading chatSessions → /v1/events loopback bridge (CAP-06)
+- [ ] 02-10-PLAN.md — MV3 browser extension (browser-extension/) monkeypatch capture on ChatGPT.com + Claude.ai → /v1/events loopback bridge (CAP-07/08)
+
+**Wave 4** *(blocked on migrations + consumer worker)*
+
+- [ ] 02-07-PLAN.md — Daily aggregator cron + cost model (four cache-token line items, effective-date pricing, subscription-separate, no-hardcoded-price guard) (ANL-05/07/08/09)
 
 ### Phase 3: Multi-Tenant Backend Maturity
 
@@ -151,7 +174,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations | 9/10 | In Progress|  |
-| 2. Parallel Adapters + Backend Analysis | 0/TBD | Not started | - |
+| 2. Parallel Adapters + Backend Analysis | 0/10 | Not started | - |
 | 3. Multi-Tenant Backend Maturity | 0/TBD | Not started | - |
 | 4. Dashboards | 0/TBD | Not started | - |
 | 5. Cross-Platform Daemon Polish | 0/TBD | Not started | - |

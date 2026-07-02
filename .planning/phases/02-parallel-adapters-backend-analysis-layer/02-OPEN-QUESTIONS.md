@@ -1,7 +1,7 @@
 ---
 phase: 02-parallel-adapters-backend-analysis-layer
 updated: 2026-07-01T00:00:00Z
-open_count: 19
+open_count: 24
 ---
 
 # Open Questions — Phase 2 Parallel Adapters + Backend Analysis Layer
@@ -175,7 +175,56 @@ open_count: 19
 
 - **Question:** 02-RESEARCH.md (§B.6) and 02-PATTERNS.md (§No Analog Found) name the MV3 browser workspace `extension/`, but the 02-10 plan-authoring directive named it `browser-extension/`. Which directory name does the workspace ship under?
 - **Tentative choice:** `browser-extension/` — used throughout 02-10-PLAN.md (files, must_haves, threat model, root-`workspaces` append). Chosen because (a) the plan-authoring directive is the most recent explicit instruction, and (b) `browser-extension/` is more self-documenting alongside the sibling `vscode-extension/` (02-09) — the two out-of-process capture clients read as a matched pair.
-- **Alternatives:** `extension/` (matches RESEARCH/PATTERNS prose; shorter). Either works — it is a directory name only, referenced nowhere in production runtime logic; the manifest, content-script, SW, and bridge-client are name-agnostic.
-- **Why uncertain:** Pure naming reconciliation between two design artifacts; no functional impact. The root `package.json` `workspaces` entry + any doc cross-refs must use the SAME name the plan ships.
-- **Impact:** Cosmetic/organisational. If the executor prefers `extension/` to match RESEARCH/PATTERNS, rename consistently across the workspace + root `workspaces` array — a contained find-replace, no logic change.
-- **Confidence:** HIGH (that either name works); the divergence is logged only so the executor picks ONE consistently.
+- **RESOLVED (adversarial-review-cycle-1 replan):** 02-PATTERNS.md's three `extension/` workspace-directory references (the pattern-assignment table row, the §NO IN-REPO ANALOG heading, and the No-Analog-Found row) were renamed to `browser-extension/` to match the plans. 02-RESEARCH.md carries NO bare `extension/` workspace-directory name — its mentions ("the MV3 extension", "the extension") are conceptual, not a directory, so no rename was needed there. The single doc name of record is now `browser-extension/` across plans + PATTERNS.
+- **Alternatives:** `extension/` (shorter). Either works — it is a directory name only, referenced nowhere in production runtime logic; the manifest, content-script, SW, and bridge-client are name-agnostic.
+- **Why uncertain:** Pure naming reconciliation between design artifacts; no functional impact. The root `package.json` `workspaces` entry + any doc cross-refs must use the SAME name the plan ships.
+- **Impact:** Cosmetic/organisational. Reconciled to `browser-extension/` everywhere the workspace directory is named.
+- **Confidence:** HIGH (that either name works); the divergence is now resolved to `browser-extension/`.
+
+---
+
+> Q20–Q22 appended 2026-07-01 by adversarial-review-cycle-1 replan (Plans 04 + 01). Each resolves a HIGH concern with a safe default applied in-plan and defers the residual maturation here.
+
+## Q20 — repo→project mapping maturation (H4 residual)
+
+- **Question:** How does an `ai_events.repo_remote` (added by Plan 04 migration 014) map to a concrete `project_id` for `daily_rollups_by_project`?
+- **Tentative choice (applied this phase):** `daily_rollups_by_project.project_id` is NULLABLE, with a per-org "default project" fallback for rows whose repo→project mapping is not yet resolved (Plan 04 Task 2 / H4). The aggregator (Plan 07) groups unresolved rows under the default project. Full repo_remote→project resolution (canonicalising remotes, matching to a `projects` row, handling forks/mirrors) matures in Phase 3/4 when the projects UX lands.
+- **Why deferred:** A robust repo→project mapping needs the Phase-3 projects/membership model and remote-canonicalisation rules that don't exist yet; forcing `project_id NOT NULL` now (as the original schema did) would either block inserts or invent bogus project rows.
+- **Safe default:** nullable project_id + org-default-project fallback; no data is lost (repo_remote is persisted on ai_events, so a Phase-3 backfill can re-derive project_id).
+- **Confidence:** HIGH (that nullable+default is safe this phase); the mapping algorithm itself is MEDIUM and deferred.
+
+## Q21 — rolling partition-ahead mechanism: pg_cron vs documented monthly migration (H1 residual)
+
+- **Question:** Does staging Supabase permit `CREATE EXTENSION pg_cron` + `cron.schedule(...)` so the monthly partition-ahead job runs automatically, or must a monthly manual migration task be run?
+- **Tentative choice (applied this phase):** Plan 04 migration 008 creates the 2026-07/08 + DEFAULT partitions unconditionally (closing the H1 gap regardless), and ATTEMPTS to install a pg_cron monthly job inside a privilege-guarded `DO` block that RAISE NOTICEs (does not hard-fail) if pg_cron is unavailable. If pg_cron is present → automatic rolling-ahead. If absent → the README's documented "monthly partition-ahead migration task" governs, and the Plan 04 Task 5 blocking gate + a monthly reminder cover it.
+- **Why deferred:** pg_cron availability is Supabase-plan-dependent and only confirmable against live staging credentials (Q11/Q16 track the same environment uncertainty). The DEFAULT partition is a safety net so a missed rollout degrades pruning rather than throwing.
+- **Safe default:** unconditional 07/08/DEFAULT partitions + guarded pg_cron attempt + documented manual fallback; record which path was taken in the 02-04-SUMMARY at push time.
+- **Confidence:** MEDIUM (pg_cron availability); HIGH (the gap itself is closed either way).
+
+## Q22 — /v1/events Origin/Sec-Fetch-Site allowlist exact values (H6 residual)
+
+- **Question:** What is the exact Origin / Sec-Fetch-Site allowlist the hardened `/v1/events` route accepts, given the paired browser extension is the intended caller?
+- **Tentative choice (applied this phase):** Plan 01 Task 2 rejects any request whose `Sec-Fetch-Site` is `cross-site` (403) and requires `Content-Type: application/json` (415 otherwise), which together block a hostile page's simple/cross-site fetch; it accepts the extension service-worker's `Sec-Fetch-Site: none`/same-origin + extension-origin. The precise `chrome-extension://<id>` / `moz-extension://<id>` origin string depends on the extension id, which is not fixed until the extension is packaged (Plan 09/10).
+- **Why deferred:** The extension id (hence its exact origin) is assigned at pack/store time; the allowlist must be finalised against the real id. The `Sec-Fetch-Site`/Content-Type gates are id-independent and hold now.
+- **Safe default:** enforce the id-independent gates (Sec-Fetch-Site cross-site reject + Content-Type require + timingSafeEqual token + body cap) this phase; finalise the exact extension-origin allowlist entry when Plan 09/10 pins the extension id — record it in the 02-01-SUMMARY / 02-09/10 SUMMARY.
+- **Confidence:** HIGH (the id-independent gates are the load-bearing mitigation); the exact origin string is a contained follow-up.
+
+---
+
+> Q23–Q24 appended 2026-07-01 by adversarial-review-cycle-1 replan (Plan 07). Each resolves a MEDIUM/LOW concern with a safe default applied in-plan and defers the residual maturation here.
+
+## Q23 — subscription-cost per-entity attribution + per-machine rollup key maturation (Plan 07 MEDIUM + H4 residual)
+
+- **Question:** (a) How is a `cost_subscription` line (Copilot/ChatGPT subscriptions) attributed to a specific user/seat, given there is no per-seat/assignment table this phase? (b) How do per-user rollups stay distinct while `daily_rollups_by_user.user_id` is a UUID column and Phase-2 events have `user_id=NULL`?
+- **Tentative choice (applied this phase):** (a) `cost_subscription` is scoped to an ORG-LEVEL line — `getSubscriptionCost({ org_id, day })` sums the org's active subscription monthly_price; it is NOT split per-user by guessing. (b) The aggregator groups source rows by `COALESCE(user_id::text, user_id_unknown)` and, for NULL-user machines, writes a DETERMINISTIC synthetic UUID derived from `user_id_unknown` (namespaced) into the rollup `user_id`, so `UNIQUE (org_id, user_id, day)` yields one row PER MACHINE rather than one shared NULL row. The synthetic key is a rollup-layer convenience (never written onto `ai_events`); Phase-3 attach re-keys it via the `attachUser` (org_id, hostname) backfill.
+- **Why deferred:** Per-seat subscription attribution needs the Phase-3 org/membership/seat model (who holds which subscription) that doesn't exist yet; forcing a per-user split now would invent bogus attributions. A dedicated per-machine rollup key column (vs a synthetic UUID in the user_id column) is also a Phase-3 identity-model concern.
+- **Safe default:** org-level subscription line + deterministic synthetic per-machine user_id; no data lost (raw user_id_unknown persists on ai_events, so Phase-3 can re-derive both the seat attribution and the real user_id).
+- **Confidence:** HIGH (that org-level + synthetic-key is safe this phase); the per-seat model + a real rollup key column are MEDIUM and deferred.
+
+## Q24 — GPT/OpenAI (and Gemini/Copilot) per-token cost pricing deferral (Plan 07 LOW; EVIDENCE C38 UNVERIFIABLE)
+
+- **Question:** Should the Phase-2 cost model + `model_pricing` seed include GPT/OpenAI per-token prices (and Gemini/Copilot), given no capture surface reliably supplies GPT token counts this phase and the GPT prices are UNVERIFIABLE here (EVIDENCE C38)?
+- **Tentative choice (applied this phase):** The cost model + seed (migration 016) cover ONLY models with PROVEN token accounting — Anthropic (four usage fields captured verbatim, EVIDENCE C31). GPT/OpenAI per-token rows are DEFERRED (not seeded). A GPT/Gemini/Copilot event therefore has no matching per-token price row and `computeEstimatedCost` treats it as 0 (graceful degradation, same path as absent tokens, EVIDENCE C10) — documented, not a bug. Copilot/ChatGPT still contribute via the org-level `cost_subscription` line (Q23).
+- **Why deferred:** GPT token counts are not reliably available from the Phase-2 capture surfaces (Copilot cache has no per-turn tokens — C10; Gemini transcripts ephemeral / token-field unconfirmed — C40/Q9); seeding GPT per-token prices would imply an accuracy the token data can't support. Because prices are DATA in the effective-date table (ANL-08, no hardcoded constants), adding GPT later is an INSERT, not a code change.
+- **Safe default:** Anthropic-only per-token seed this phase; GPT/Gemini/Copilot per-token cost = 0 with the subscription line covering the flat products; re-verify + add GPT prices (and confirm a GPT token source) in a later phase. Re-verify ALL prices at build (volatile — Q12/Q15).
+- **Confidence:** HIGH (that Anthropic-only + graceful-zero is safe this phase); GPT token availability + prices are LOW/deferred.
